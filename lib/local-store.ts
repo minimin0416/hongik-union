@@ -173,7 +173,7 @@ export const getClubs = (): ClubData[] => {
   if (typeof window === 'undefined') return defaultClubs as ClubData[];
   const s = localStorage.getItem('hn_clubs');
   if (s) return JSON.parse(s);
-  const seeded = defaultClubs.map((c) => ({ ...c, imageUrl: '' }));
+  const seeded = defaultClubs.map((c) => ({ ...c, instagram: c.instagram ?? '', imageUrl: '' }));
   localStorage.setItem('hn_clubs', JSON.stringify(seeded));
   return seeded;
 };
