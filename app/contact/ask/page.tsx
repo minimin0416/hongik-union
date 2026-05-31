@@ -7,7 +7,7 @@ export default function AskPage() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: '', contact: '', email: '', category: '', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newInquiry: Inquiry = {
       id: Date.now().toString(),
@@ -15,8 +15,8 @@ export default function AskPage() {
       status: 'pending',
       createdAt: new Date().toISOString().slice(0, 10),
     };
-    const existing = getInquiries();
-    saveInquiries([newInquiry, ...existing]);
+    const existing = await getInquiries();
+    await saveInquiries([newInquiry, ...existing]);
     setSubmitted(true);
   };
 

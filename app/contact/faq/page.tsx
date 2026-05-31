@@ -6,7 +6,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 export default function FaqPage() {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [open, setOpen] = useState<number | null>(null);
-  useEffect(() => { setFaqs(getSiteContent().faqs); }, []);
+  useEffect(() => { getSiteContent().then(c => setFaqs(c.faqs)); }, []);
 
   return (
     <div className="max-w-3xl">

@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export default function FormsPage() {
   const [forms, setForms] = useState<FormFile[]>([]);
-  useEffect(() => setForms(getForms()), []);
+  useEffect(() => { getForms().then(setForms); }, []);
 
   return (
     <div>

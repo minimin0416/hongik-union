@@ -4,7 +4,7 @@ import { getSiteContent } from '@/lib/local-store';
 
 export default function ElectionIntroPage() {
   const [text, setText] = useState('');
-  useEffect(() => { setText(getSiteContent().electionIntro); }, []);
+  useEffect(() => { getSiteContent().then(c => setText(c.electionIntro)); }, []);
 
   return (
     <div className="max-w-3xl">

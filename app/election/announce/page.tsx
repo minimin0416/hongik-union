@@ -5,7 +5,7 @@ import { getElection, downloadFile, type ElectionAnnouncement } from '@/lib/loca
 export default function ElectionAnnouncePage() {
   const [list, setList] = useState<ElectionAnnouncement[]>([]);
   const [selected, setSelected] = useState<ElectionAnnouncement | null>(null);
-  useEffect(() => setList(getElection()), []);
+  useEffect(() => { getElection().then(setList); }, []);
 
   const statusColor: Record<string, string> = { 예정: 'bg-blue-100 text-blue-700', 진행중: 'bg-green-100 text-green-700', 완료: 'bg-gray-100 text-gray-500' };
 

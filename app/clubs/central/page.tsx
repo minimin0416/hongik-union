@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { clubs } from '@/lib/clubs-data';
+import { getClubs, type ClubData } from '@/lib/local-store';
 import ScrollReveal from '@/components/ScrollReveal';
 
 const categories = ['전체', '공연분과', '스포츠분과', '레저분과', '종교분과', '사회분과', '학술분과', '전시분과'];
@@ -13,6 +13,8 @@ function ClubsContent() {
   const initialCategory = searchParams.get('category') || '전체';
   const [selected, setSelected] = useState(initialCategory);
   const [search, setSearch] = useState('');
+  const [clubs, setClubs] = useState<ClubData[]>([]);
+  useEffect(() => { getClubs().then(setClubs); }, []);
 
   const filtered = clubs.filter(
     (c) => (selected === '전체' || c.category === selected) &&

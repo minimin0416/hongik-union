@@ -8,7 +8,7 @@ export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [selected, setSelected] = useState<Notice | null>(null);
 
-  useEffect(() => { setNotices(getNotices()); }, []);
+  useEffect(() => { getNotices().then(setNotices); }, []);
 
   const pinned = notices.filter((n) => n.isPinned);
   const normal = notices.filter((n) => !n.isPinned);

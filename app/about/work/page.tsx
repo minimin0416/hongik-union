@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export default function WorkPage() {
   const [items, setItems] = useState<WorkItem[]>([]);
-  useEffect(() => { setItems(getSiteContent().workItems); }, []);
+  useEffect(() => { getSiteContent().then(c => setItems(c.workItems)); }, []);
 
   return (
     <div>

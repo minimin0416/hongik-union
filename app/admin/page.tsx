@@ -173,7 +173,7 @@ function AboutTab() {
   const [orgImage, setOrgImage] = useState('');
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { setContent(getSiteContent()); setOrgImage(getOrgImage()); }, []);
+  useEffect(() => { getSiteContent().then(setContent); getOrgImage().then(setOrgImage); }, []);
   if (!content) return null;
 
   const save = () => { saveSiteContent(content); setSaved(true); setTimeout(() => setSaved(false), 2000); };
@@ -276,7 +276,7 @@ function ClubsTab() {
   const [show, setShow] = useState(false);
   const [filter, setFilter] = useState('전체');
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => setClubs(getClubs()), []);
+  useEffect(() => { getClubs().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveClubs(v); };
   const updArr = (f: 'activities' | 'targets', i: number, v: string) => { const a = [...form[f]]; a[i] = v; setForm({ ...form, [f]: a }); };
   const addArr = (f: 'activities' | 'targets') => setForm({ ...form, [f]: [...form[f], ''] });
@@ -363,7 +363,7 @@ function NewsTab() {
   const [nForm, setNForm] = useState({ title: '', content: '', isPinned: false, attachment: undefined as Attachment | undefined });
   const [nEditId, setNEditId] = useState<string | null>(null);
   const [nShow, setNShow] = useState(false);
-  useEffect(() => setNotices(getNotices()), []);
+  useEffect(() => { getNotices().then(setNotices); }, []);
   const saveN = (v: Notice[]) => { setNotices(v); saveNotices(v); };
   const submitN = (e: React.FormEvent) => {
     e.preventDefault();
@@ -377,7 +377,7 @@ function NewsTab() {
   const [mForm, setMForm] = useState({ title: '', date: '', attendees: '', attachment: undefined as Attachment | undefined });
   const [mEditId, setMEditId] = useState<string | null>(null);
   const [mShow, setMShow] = useState(false);
-  useEffect(() => setMinutes(getMinutes()), []);
+  useEffect(() => { getMinutes().then(setMinutes); }, []);
   const saveM = (v: Minutes[]) => { setMinutes(v); saveMinutes(v); };
   const submitM = (e: React.FormEvent) => {
     e.preventDefault();
@@ -391,7 +391,7 @@ function NewsTab() {
   const [cnForm, setCnForm] = useState({ club: '', category: '공연분과', title: '', content: '', date: new Date().toISOString().slice(0, 10), imageUrl: '' });
   const [cnEditId, setCnEditId] = useState<string | null>(null);
   const [cnShow, setCnShow] = useState(false);
-  useEffect(() => setClubNews(getClubNews()), []);
+  useEffect(() => { getClubNews().then(setClubNews); }, []);
   const saveCN = (v: ClubNews[]) => { setClubNews(v); saveClubNews(v); };
   const submitCN = (e: React.FormEvent) => {
     e.preventDefault();
@@ -513,7 +513,7 @@ function InfoTab() {
   const [fForm, setFForm] = useState({ name: '', description: '', fileType: 'HWP', updatedAt: new Date().toISOString().slice(0, 7), attachment: undefined as Attachment | undefined });
   const [fEditId, setFEditId] = useState<string | null>(null);
   const [fShow, setFShow] = useState(false);
-  useEffect(() => setForms(getForms()), []);
+  useEffect(() => { getForms().then(setForms); }, []);
   const saveF = (v: FormFile[]) => { setForms(v); saveForms(v); };
   const submitF = (e: React.FormEvent) => {
     e.preventDefault();
@@ -526,7 +526,7 @@ function InfoTab() {
   const [pForm, setPForm] = useState({ club: '', reason: '', points: 1, date: new Date().toISOString().slice(0, 10) });
   const [pEditId, setPEditId] = useState<string | null>(null);
   const [pShow, setPShow] = useState(false);
-  useEffect(() => setPenalties(getPenalties()), []);
+  useEffect(() => { getPenalties().then(setPenalties); }, []);
   const saveP = (v: Penalty[]) => { setPenalties(v); savePenalties(v); };
   const submitP = (e: React.FormEvent) => {
     e.preventDefault();
@@ -604,13 +604,13 @@ function ElectionTab() {
   const [sub, setSub] = useState<Sub>('intro');
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saved, setSaved] = useState(false);
-  useEffect(() => setContent(getSiteContent()), []);
+  useEffect(() => { getSiteContent().then(setContent); }, []);
 
   const [election, setElection] = useState<ElectionAnnouncement[]>([]);
   const [eForm, setEForm] = useState({ title: '', content: '', date: new Date().toISOString().slice(0, 10), status: '예정' as '예정' | '진행중' | '완료', attachment: undefined as Attachment | undefined });
   const [eEditId, setEEditId] = useState<string | null>(null);
   const [eShow, setEShow] = useState(false);
-  useEffect(() => setElection(getElection()), []);
+  useEffect(() => { getElection().then(setElection); }, []);
   const saveE = (v: ElectionAnnouncement[]) => { setElection(v); saveElection(v); };
   const submitE = (e: React.FormEvent) => {
     e.preventDefault();
@@ -683,12 +683,12 @@ function ContactTab() {
   const [sub, setSub] = useState<Sub>('faq');
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saved, setSaved] = useState(false);
-  useEffect(() => setContent(getSiteContent()), []);
+  useEffect(() => { getSiteContent().then(setContent); }, []);
 
   const [list, setList] = useState<Inquiry[]>([]);
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
-  useEffect(() => setList(getInquiries()), []);
+  useEffect(() => { getInquiries().then(setList); }, []);
   const saveI = (v: Inquiry[]) => { setList(v); saveInquiries(v); };
   const confirmI = (id: string) => { const v = list.map((i) => i.id === id ? { ...i, status: 'confirmed' as const } : i); saveI(v); if (selected?.id === id) setSelected({ ...selected, status: 'confirmed' }); };
   const delI = (id: string) => { if (window.confirm('삭제?')) { saveI(list.filter((i) => i.id !== id)); if (selected?.id === id) setSelected(null); } };
@@ -784,7 +784,7 @@ function ContactTab() {
 function ImagesTab() {
   const [banners, setBanners] = useState(['', '', '']);
   const [logo, setLogo] = useState('');
-  useEffect(() => { setBanners(getBanners()); setLogo(getLogo()); }, []);
+  useEffect(() => { getBanners().then(setBanners); getLogo().then(setLogo); }, []);
   const handleBanner = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     const r = await readFileAsBase64(file); const u = [...banners]; u[idx] = r.url; setBanners(u); saveBanners(u);
@@ -873,7 +873,7 @@ function PwChangeForm() {
 function SettingsTab() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saved, setSaved] = useState(false);
-  useEffect(() => setContent(getSiteContent()), []);
+  useEffect(() => { getSiteContent().then(setContent); }, []);
   if (!content) return null;
   const save = () => { saveSiteContent(content); setSaved(true); setTimeout(() => setSaved(false), 2000); };
 

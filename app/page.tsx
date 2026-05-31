@@ -62,9 +62,9 @@ export default function HomePage() {
   const [bannerImgs, setBannerImgs] = useState<string[]>([]);
 
   useEffect(() => {
-    setNotices(getNotices());
-    setSlides(getSiteContent().bannerSlides);
-    setBannerImgs(getBanners());
+    getNotices().then(setNotices);
+    getSiteContent().then(c => setSlides(c.bannerSlides));
+    getBanners().then(setBannerImgs);
     const timer = setInterval(() => setCurrentSlide((p) => (p + 1) % 3), 5000);
     return () => clearInterval(timer);
   }, []);

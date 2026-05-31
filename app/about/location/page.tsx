@@ -5,8 +5,7 @@ import { getSiteContent } from '@/lib/local-store';
 export default function LocationPage() {
   const [c, setC] = useState({ locationAddress: '', locationHours: '', locationPhone: '', locationEmail: '' });
   useEffect(() => {
-    const s = getSiteContent();
-    setC({ locationAddress: s.locationAddress, locationHours: s.locationHours, locationPhone: s.locationPhone, locationEmail: s.locationEmail });
+    getSiteContent().then(s => setC({ locationAddress: s.locationAddress, locationHours: s.locationHours, locationPhone: s.locationPhone, locationEmail: s.locationEmail }));
   }, []);
 
   return (

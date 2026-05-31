@@ -4,7 +4,7 @@ import { getOrgImage } from '@/lib/local-store';
 
 export default function OrgPage() {
   const [orgImage, setOrgImage] = useState('');
-  useEffect(() => { setOrgImage(getOrgImage()); }, []);
+  useEffect(() => { getOrgImage().then(setOrgImage); }, []);
 
   return (
     <div>

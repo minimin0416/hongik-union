@@ -72,10 +72,8 @@ export default function Header() {
   const [kakaoUrl, setKakaoUrl] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   useEffect(() => {
-    const c = getSiteContent();
-    setInstagramUrl(c.instagramUrl);
-    setKakaoUrl(c.kakaoUrl);
-    setLogoUrl(getLogo());
+    getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
+    getLogo().then(setLogoUrl);
   }, []);
 
   return (

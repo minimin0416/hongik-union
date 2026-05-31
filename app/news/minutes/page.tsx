@@ -4,7 +4,7 @@ import { getMinutes, downloadFile, type Minutes } from '@/lib/local-store';
 
 export default function MinutesPage() {
   const [list, setList] = useState<Minutes[]>([]);
-  useEffect(() => setList(getMinutes()), []);
+  useEffect(() => { getMinutes().then(setList); }, []);
 
   return (
     <div>

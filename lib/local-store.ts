@@ -1,3 +1,4 @@
+import { supabase } from './supabase';
 import { clubs as defaultClubs } from './clubs-data';
 
 /* ── 유틸 ── */
@@ -18,65 +19,21 @@ export const downloadFile = (url: string, name: string) => {
 
 /* ── 타입 정의 ── */
 export type Attachment = { url: string; name: string; type: string };
-
-export type Notice = {
-  id: string; title: string; content: string;
-  isPinned: boolean; createdAt: string;
-  attachment?: Attachment;
-};
-
-export type ClubData = {
-  id: number; name: string; category: string; room: string;
-  president: string; contact: string; recruitPeriod: string;
-  meetingSchedule: string; intro: string; desc: string;
-  activities: string[]; targets: string[]; instagram: string; imageUrl?: string;
-};
-
-export type Minutes = {
-  id: string; title: string; date: string; attendees: string;
-  attachment?: Attachment;
-};
-
-export type ClubNews = {
-  id: string; club: string; category: string; title: string;
-  content: string; date: string; imageUrl?: string;
-};
-
-export type Penalty = {
-  id: string; club: string; reason: string; points: number; date: string;
-};
-
-export type FormFile = {
-  id: string; name: string; description: string;
-  fileType: string; updatedAt: string; attachment?: Attachment;
-};
-
-export type ElectionAnnouncement = {
-  id: string; title: string; content: string; date: string;
-  status: '예정' | '진행중' | '완료'; attachment?: Attachment;
-};
-
-export type Inquiry = {
-  id: string; name: string; email: string; contact: string;
-  category: string; message: string;
-  status: 'pending' | 'confirmed'; createdAt: string;
-};
-
+export type Notice = { id: string; title: string; content: string; isPinned: boolean; createdAt: string; attachment?: Attachment };
+export type ClubData = { id: number; name: string; category: string; room: string; president: string; contact: string; recruitPeriod: string; meetingSchedule: string; intro: string; desc: string; activities: string[]; targets: string[]; instagram: string; imageUrl?: string };
+export type Minutes = { id: string; title: string; date: string; attendees: string; attachment?: Attachment };
+export type ClubNews = { id: string; club: string; category: string; title: string; content: string; date: string; imageUrl?: string };
+export type Penalty = { id: string; club: string; reason: string; points: number; date: string };
+export type FormFile = { id: string; name: string; description: string; fileType: string; updatedAt: string; attachment?: Attachment };
+export type ElectionAnnouncement = { id: string; title: string; content: string; date: string; status: '예정' | '진행중' | '완료'; attachment?: Attachment };
+export type Inquiry = { id: string; name: string; email: string; contact: string; category: string; message: string; status: 'pending' | 'confirmed'; createdAt: string };
 export type BannerSlide = { title: string; subtitle: string };
 export type WorkItem   = { title: string; desc: string };
 export type FaqItem    = { q: string; a: string };
-
 export type SiteContent = {
-  bannerSlides: BannerSlide[];
-  aboutIntro: string;
-  workItems: WorkItem[];
-  locationAddress: string; locationHours: string;
-  locationPhone: string; locationEmail: string;
-  rules: string;
-  faqs: FaqItem[];
-  electionIntro: string;
-  instagramUrl: string;
-  kakaoUrl: string;
+  bannerSlides: BannerSlide[]; aboutIntro: string; workItems: WorkItem[];
+  locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
+  rules: string; faqs: FaqItem[]; electionIntro: string; instagramUrl: string; kakaoUrl: string;
 };
 
 /* ── 기본값 ── */
@@ -85,24 +42,20 @@ const defaultNotices: Notice[] = [
   { id: '2', title: '[공지] 동아리방 청소 및 점검 일정 안내', content: '', isPinned: false, createdAt: '2025-05-25' },
   { id: '3', title: '[공지] 총동아리연합회 정기총회 개최 안내', content: '', isPinned: false, createdAt: '2025-05-20' },
 ];
-
 const defaultMinutes: Minutes[] = [
   { id: '1', title: '2025년 1학기 제5차 정기회의', date: '2025-05-20', attendees: '15명' },
   { id: '2', title: '2025년 1학기 제4차 정기회의', date: '2025-05-06', attendees: '13명' },
 ];
-
 const defaultForms: FormFile[] = [
   { id: '1', name: '동아리 등록 신청서', description: '신규 동아리 등록 시 제출', fileType: 'HWP', updatedAt: '2025.03' },
   { id: '2', name: '동아리 등록 갱신 신청서', description: '매 학기 갱신 시 제출', fileType: 'HWP', updatedAt: '2025.03' },
   { id: '3', name: '활동 지원금 신청서', description: '활동 지원금 신청 시 제출', fileType: 'HWP', updatedAt: '2025.03' },
   { id: '4', name: '활동 보고서 양식', description: '학기 말 제출 필수', fileType: 'HWP', updatedAt: '2025.03' },
 ];
-
 const defaultElectionAnnouncements: ElectionAnnouncement[] = [
   { id: '1', title: '[공고] 제40대 총동아리연합회 임원 선거 일정 공고', content: '', date: '2025-11-01', status: '예정' },
   { id: '2', title: '[공고] 제39대 총동아리연합회 임원 선거 당선자 발표', content: '', date: '2024-11-20', status: '완료' },
 ];
-
 export const defaultContent: SiteContent = {
   bannerSlides: [
     { title: '홍익대학교 총동아리연합회', subtitle: '우리 모두가 함께 만들어가는 동아리 문화' },
@@ -124,7 +77,7 @@ export const defaultContent: SiteContent = {
   locationEmail: 'union@hongik.ac.kr',
   rules: '제1장 총칙\n제1조 본 회의 명칭은 홍익대학교 총동아리연합회라 한다.\n\n(관리자 페이지에서 전체 회칙을 입력해주세요)',
   faqs: [
-    { q: '동아리를 새로 만들고 싶은데 어떻게 하나요?', a: '매 학기 초에 신규 동아리 등록 신청을 받습니다. 신청서를 작성하여 총동아리연합회실(G301-1)에 제출하거나 이메일로 제출해주세요.' },
+    { q: '동아리를 새로 만들고 싶은데 어떻게 하나요?', a: '매 학기 초에 신규 동아리 등록 신청을 받습니다.' },
     { q: '동아리방은 어떻게 신청하나요?', a: '동아리방은 학기 초에 선착순 또는 추첨으로 배정됩니다.' },
     { q: '활동 지원금은 언제 받을 수 있나요?', a: '활동 지원금은 학기 초에 신청을 받아 배분합니다.' },
     { q: '총동아리연합회 운영시간은 언제인가요?', a: '평일 오전 10시부터 오후 5시까지 운영합니다. G동 301-1호에 위치합니다.' },
@@ -134,55 +87,81 @@ export const defaultContent: SiteContent = {
   kakaoUrl: '',
 };
 
-/* ── getter/setter ── */
-function store<T>(key: string, def: T) {
-  return {
-    get: (): T => {
-      if (typeof window === 'undefined') return def;
-      const s = localStorage.getItem(key);
-      return s ? JSON.parse(s) : def;
-    },
-    set: (v: T) => localStorage.setItem(key, JSON.stringify(v)),
-  };
+/* ── Supabase DB 헬퍼 ── */
+async function dbGet<T>(key: string, def: T): Promise<T> {
+  if (typeof window === 'undefined') return def;
+  try {
+    const { data } = await supabase.from('site_data').select('value').eq('key', key).maybeSingle();
+    return data ? (JSON.parse(data.value) as T) : def;
+  } catch {
+    const s = localStorage.getItem(key);
+    return s ? (JSON.parse(s) as T) : def;
+  }
 }
 
-const noticesStore      = store<Notice[]>('hn_notices', defaultNotices);
-const minutesStore      = store<Minutes[]>('hn_minutes', defaultMinutes);
-const clubNewsStore     = store<ClubNews[]>('hn_club_news', []);
-const penaltiesStore    = store<Penalty[]>('hn_penalties', []);
-const formsStore        = store<FormFile[]>('hn_forms', defaultForms);
-const electionStore     = store<ElectionAnnouncement[]>('hn_election', defaultElectionAnnouncements);
-const inquiriesStore    = store<Inquiry[]>('hn_inquiries', []);
-const bannersStore      = store<string[]>('hn_banners', ['', '', '']);
-const logoStore         = { get: () => typeof window !== 'undefined' ? localStorage.getItem('hn_logo') || '' : '', set: (v: string) => localStorage.setItem('hn_logo', v) };
+async function dbSet(key: string, value: unknown): Promise<void> {
+  if (typeof window === 'undefined') return;
+  try {
+    await supabase.from('site_data').upsert({ key, value: JSON.stringify(value), updated_at: new Date().toISOString() });
+  } catch {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+}
 
-export const getNotices  = noticesStore.get;   export const saveNotices  = noticesStore.set;
-export const getMinutes  = minutesStore.get;   export const saveMinutes  = minutesStore.set;
-export const getClubNews = clubNewsStore.get;  export const saveClubNews = clubNewsStore.set;
-export const getPenalties= penaltiesStore.get; export const savePenalties= penaltiesStore.set;
-export const getForms    = formsStore.get;     export const saveForms    = formsStore.set;
-export const getElection = electionStore.get;  export const saveElection = electionStore.set;
-export const getInquiries= inquiriesStore.get; export const saveInquiries= inquiriesStore.set;
-export const getBanners  = bannersStore.get;   export const saveBanners  = bannersStore.set;
-export const getLogo     = logoStore.get;      export const saveLogo     = logoStore.set;
+async function dbGetStr(key: string): Promise<string> {
+  if (typeof window === 'undefined') return '';
+  try {
+    const { data } = await supabase.from('site_data').select('value').eq('key', key).maybeSingle();
+    return data?.value ?? '';
+  } catch {
+    return localStorage.getItem(key) ?? '';
+  }
+}
 
-const orgImageStore = { get: () => typeof window !== 'undefined' ? localStorage.getItem('hn_org_image') || '' : '', set: (v: string) => localStorage.setItem('hn_org_image', v) };
-export const getOrgImage = orgImageStore.get;  export const saveOrgImage = orgImageStore.set;
+async function dbSetStr(key: string, value: string): Promise<void> {
+  if (typeof window === 'undefined') return;
+  try {
+    await supabase.from('site_data').upsert({ key, value, updated_at: new Date().toISOString() });
+  } catch {
+    localStorage.setItem(key, value);
+  }
+}
 
-export const getClubs = (): ClubData[] => {
-  if (typeof window === 'undefined') return defaultClubs as ClubData[];
-  const s = localStorage.getItem('hn_clubs');
-  if (s) return JSON.parse(s);
-  const seeded = defaultClubs.map((c) => ({ ...c, instagram: c.instagram ?? '', imageUrl: '' }));
-  localStorage.setItem('hn_clubs', JSON.stringify(seeded));
-  return seeded;
+/* ── getter / setter ── */
+export const getNotices    = (): Promise<Notice[]>               => dbGet('hn_notices',   defaultNotices);
+export const saveNotices   = (v: Notice[])                       => dbSet('hn_notices',   v);
+export const getMinutes    = (): Promise<Minutes[]>              => dbGet('hn_minutes',   defaultMinutes);
+export const saveMinutes   = (v: Minutes[])                      => dbSet('hn_minutes',   v);
+export const getClubNews   = (): Promise<ClubNews[]>             => dbGet('hn_club_news', []);
+export const saveClubNews  = (v: ClubNews[])                     => dbSet('hn_club_news', v);
+export const getPenalties  = (): Promise<Penalty[]>              => dbGet('hn_penalties', []);
+export const savePenalties = (v: Penalty[])                      => dbSet('hn_penalties', v);
+export const getForms      = (): Promise<FormFile[]>             => dbGet('hn_forms',     defaultForms);
+export const saveForms     = (v: FormFile[])                     => dbSet('hn_forms',     v);
+export const getElection   = (): Promise<ElectionAnnouncement[]> => dbGet('hn_election',  defaultElectionAnnouncements);
+export const saveElection  = (v: ElectionAnnouncement[])         => dbSet('hn_election',  v);
+export const getInquiries  = (): Promise<Inquiry[]>              => dbGet('hn_inquiries', []);
+export const saveInquiries = (v: Inquiry[])                      => dbSet('hn_inquiries', v);
+export const getBanners    = (): Promise<string[]>               => dbGet('hn_banners',   ['', '', '']);
+export const saveBanners   = (v: string[])                       => dbSet('hn_banners',   v);
+export const getLogo       = (): Promise<string>                 => dbGetStr('hn_logo');
+export const saveLogo      = (v: string)                         => dbSetStr('hn_logo',      v);
+export const getOrgImage   = (): Promise<string>                 => dbGetStr('hn_org_image');
+export const saveOrgImage  = (v: string)                         => dbSetStr('hn_org_image', v);
+
+export const getClubs = async (): Promise<ClubData[]> => {
+  const data = await dbGet<ClubData[]>('hn_clubs', []);
+  if (data.length === 0) {
+    const seeded = (defaultClubs as any[]).map((c) => ({ ...c, instagram: c.instagram ?? '', imageUrl: '' })) as ClubData[];
+    await dbSet('hn_clubs', seeded);
+    return seeded;
+  }
+  return data;
 };
-export const saveClubs = (c: ClubData[]) => localStorage.setItem('hn_clubs', JSON.stringify(c));
+export const saveClubs = (v: ClubData[]) => dbSet('hn_clubs', v);
 
-export const getSiteContent = (): SiteContent => {
-  if (typeof window === 'undefined') return defaultContent;
-  const s = localStorage.getItem('hn_content');
-  if (!s) return defaultContent;
-  return { ...defaultContent, ...JSON.parse(s) };
+export const getSiteContent = async (): Promise<SiteContent> => {
+  const data = await dbGet<Partial<SiteContent>>('hn_content', {});
+  return { ...defaultContent, ...data };
 };
-export const saveSiteContent = (c: SiteContent) => localStorage.setItem('hn_content', JSON.stringify(c));
+export const saveSiteContent = (v: SiteContent) => dbSet('hn_content', v);

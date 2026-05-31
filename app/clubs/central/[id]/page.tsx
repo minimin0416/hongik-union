@@ -11,10 +11,11 @@ export default function ClubDetailPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const clubs = getClubs();
+    getClubs().then(clubs => {
     const found = clubs.find((c) => c.id === Number(params.id));
     if (found) setClub(found);
     else setNotFound(true);
+    });
   }, [params.id]);
 
   if (notFound) return (

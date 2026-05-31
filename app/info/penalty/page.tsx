@@ -4,7 +4,7 @@ import { getPenalties, type Penalty } from '@/lib/local-store';
 
 export default function PenaltyPage() {
   const [list, setList] = useState<Penalty[]>([]);
-  useEffect(() => setList(getPenalties()), []);
+  useEffect(() => { getPenalties().then(setList); }, []);
 
   return (
     <div>

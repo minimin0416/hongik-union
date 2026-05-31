@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export default function IntroPage() {
   const [text, setText] = useState('');
-  useEffect(() => { setText(getSiteContent().aboutIntro); }, []);
+  useEffect(() => { getSiteContent().then(c => setText(c.aboutIntro)); }, []);
 
   return (
     <div className="max-w-3xl">

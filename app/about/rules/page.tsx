@@ -4,7 +4,7 @@ import { getSiteContent } from '@/lib/local-store';
 
 export default function RulesPage() {
   const [text, setText] = useState('');
-  useEffect(() => { setText(getSiteContent().rules); }, []);
+  useEffect(() => { getSiteContent().then(c => setText(c.rules)); }, []);
 
   return (
     <div className="max-w-3xl">

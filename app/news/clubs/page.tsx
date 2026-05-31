@@ -4,7 +4,7 @@ import { getClubNews, type ClubNews } from '@/lib/local-store';
 
 export default function ClubNewsPage() {
   const [news, setNews] = useState<ClubNews[]>([]);
-  useEffect(() => setNews(getClubNews()), []);
+  useEffect(() => { getClubNews().then(setNews); }, []);
 
   return (
     <div>
