@@ -134,9 +134,9 @@ export default function HomePage() {
             {notices.map((n, idx) => (
               <Link key={n.id} href="/news/notices"
                 className={`flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                {n.isNew && <span className="text-xs bg-red-500 text-white px-1 py-0.5 rounded font-bold flex-shrink-0">N</span>}
+                {n.isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
                 <span className="flex-1 text-gray-700 truncate">{n.title}</span>
-                <span className="text-xs text-gray-400 flex-shrink-0">{n.date}</span>
+                <span className="text-xs text-gray-400 flex-shrink-0">{n.createdAt}</span>
               </Link>
             ))}
           </div>
