@@ -1,8 +1,5 @@
 import { clubs as defaultClubs } from './clubs-data';
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-const sbHeaders = () => ({ 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' });
 
 /* ── 유틸 ── */
 export const readFileAsBase64 = (file: File): Promise<{ url: string; name: string; type: string }> =>
@@ -90,14 +87,13 @@ export const defaultContent: SiteContent = {
   kakaoUrl: '',
 };
 
-/* ── DB 헬퍼 (raw fetch) ── */
+/* ── DB 헬퍼 (서버 API 라우트 경유) ── */
 async function dbGet<T>(key: string, def: T): Promise<T> {
-  if (typeof window === 'undefined' || !SB_URL) return def;
+  if (typeof window === 'undefined') return def;
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/site_data?select=value&key=eq.${encodeURIComponent(key)}`, { headers: sbHeaders() });
-    if (!res.ok) throw new Error(`${res.status}`);
-    const rows = await res.json();
-    return rows.length > 0 ? (JSON.parse(rows[0].value) as T) : def;
+    const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
+    const value = await res.json();
+    return value !== null ? (JSON.parse(value) as T) : def;
   } catch {
     const s = localStorage.getItem(key);
     return s ? (JSON.parse(s) as T) : def;
@@ -105,40 +101,37 @@ async function dbGet<T>(key: string, def: T): Promise<T> {
 }
 
 async function dbSet(key: string, value: unknown): Promise<void> {
-  if (typeof window === 'undefined' || !SB_URL) return;
+  if (typeof window === 'undefined') return;
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/site_data`, {
+    await fetch('/api/data', {
       method: 'POST',
-      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key, value: JSON.stringify(value), updated_at: new Date().toISOString() }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value: JSON.stringify(value) }),
     });
-    if (!res.ok) throw new Error(`${res.status}`);
   } catch {
     localStorage.setItem(key, JSON.stringify(value));
   }
 }
 
 async function dbGetStr(key: string): Promise<string> {
-  if (typeof window === 'undefined' || !SB_URL) return '';
+  if (typeof window === 'undefined') return '';
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/site_data?select=value&key=eq.${encodeURIComponent(key)}`, { headers: sbHeaders() });
-    if (!res.ok) throw new Error(`${res.status}`);
-    const rows = await res.json();
-    return rows.length > 0 ? rows[0].value : '';
+    const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
+    const value = await res.json();
+    return value !== null ? value : '';
   } catch {
     return localStorage.getItem(key) ?? '';
   }
 }
 
 async function dbSetStr(key: string, value: string): Promise<void> {
-  if (typeof window === 'undefined' || !SB_URL) return;
+  if (typeof window === 'undefined') return;
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/site_data`, {
+    await fetch('/api/data', {
       method: 'POST',
-      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key, value, updated_at: new Date().toISOString() }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value }),
     });
-    if (!res.ok) throw new Error(`${res.status}`);
   } catch {
     localStorage.setItem(key, value);
   }
