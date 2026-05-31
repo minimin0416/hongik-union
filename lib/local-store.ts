@@ -2,7 +2,7 @@ import { clubs as defaultClubs } from './clubs-data';
 
 const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-const sbHeaders = () => ({ 'apikey': SB_KEY, 'Content-Type': 'application/json' });
+const sbHeaders = () => ({ 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' });
 
 /* ── 유틸 ── */
 export const readFileAsBase64 = (file: File): Promise<{ url: string; name: string; type: string }> =>
