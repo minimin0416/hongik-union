@@ -87,54 +87,67 @@ export const defaultContent: SiteContent = {
   kakaoUrl: '',
 };
 
-/* ── DB 헬퍼 (서버 API 라우트 경유) ── */
+/* ── DB 헬퍼 (캐시 우선 + 백그라운드 갱신) ── */
 async function dbGet<T>(key: string, def: T): Promise<T> {
   if (typeof window === 'undefined') return def;
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    // 캐시 즉시 반환, 백그라운드에서 Supabase 갱신
+    fetch(`/api/data?key=${encodeURIComponent(key)}`)
+      .then(r => r.json())
+      .then(v => { if (v !== null) localStorage.setItem(key, v); })
+      .catch(() => {});
+    return JSON.parse(cached) as T;
+  }
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
-    return value !== null ? (JSON.parse(value) as T) : def;
-  } catch {
-    const s = localStorage.getItem(key);
-    return s ? (JSON.parse(s) as T) : def;
-  }
+    if (value !== null) { localStorage.setItem(key, value); return JSON.parse(value) as T; }
+    return def;
+  } catch { return def; }
 }
 
 async function dbSet(key: string, value: unknown): Promise<void> {
   if (typeof window === 'undefined') return;
+  const serialized = JSON.stringify(value);
+  localStorage.setItem(key, serialized); // 즉시 캐시 업데이트
   try {
     await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, value: JSON.stringify(value) }),
+      body: JSON.stringify({ key, value: serialized }),
     });
-  } catch {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
+  } catch {}
 }
 
 async function dbGetStr(key: string): Promise<string> {
   if (typeof window === 'undefined') return '';
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    fetch(`/api/data?key=${encodeURIComponent(key)}`)
+      .then(r => r.json())
+      .then(v => { if (v !== null) localStorage.setItem(key, v); })
+      .catch(() => {});
+    return cached;
+  }
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
-    return value !== null ? value : '';
-  } catch {
-    return localStorage.getItem(key) ?? '';
-  }
+    if (value !== null) { localStorage.setItem(key, value); return value; }
+    return '';
+  } catch { return ''; }
 }
 
 async function dbSetStr(key: string, value: string): Promise<void> {
   if (typeof window === 'undefined') return;
+  localStorage.setItem(key, value); // 즉시 캐시 업데이트
   try {
     await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value }),
     });
-  } catch {
-    localStorage.setItem(key, value);
-  }
+  } catch {}
 }
 
 /* ── getter / setter ── */
