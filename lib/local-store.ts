@@ -31,7 +31,7 @@ export type BannerSlide = { title: string; subtitle: string };
 export type WorkItem   = { title: string; desc: string };
 export type FaqItem    = { q: string; a: string };
 export type SiteContent = {
-  bannerSlides: BannerSlide[]; aboutIntro: string; workItems: WorkItem[];
+  bannerSlides: BannerSlide[]; aboutIntro: string; aboutVision: string; workItems: WorkItem[];
   locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
   rules: string; faqs: FaqItem[]; electionIntro: string; instagramUrl: string; kakaoUrl: string;
 };
@@ -63,6 +63,7 @@ export const defaultContent: SiteContent = {
     { title: '동아리 신규 가입 안내', subtitle: '나에게 맞는 동아리를 찾아보세요' },
   ],
   aboutIntro: '홍익대학교 총동아리연합회(이하 총동아리연합회)는 홍익대학교 내 모든 중앙동아리를 대표하는 학생 자치 기구입니다.\n\n총동아리연합회는 동아리들의 권익을 대변하고, 동아리 활동을 지원하며, 학교와 동아리 간의 원활한 소통을 담당합니다.',
+  aboutVision: '모든 동아리가 자유롭게 활동하고 성장할 수 있는 환경을 만들어, 홍익대학교 내 동아리 문화를 더욱 풍성하게 발전시킵니다.',
   workItems: [
     { title: '동아리 등록 및 관리', desc: '신규 동아리 등록 심사, 기존 동아리 활동 현황 관리 및 지원' },
     { title: '활동 지원금 배분', desc: '학교로부터 지원받은 활동비를 각 동아리에 공정하게 배분' },
@@ -169,8 +170,10 @@ export const getBanners    = (): Promise<string[]>               => dbGet('hn_ba
 export const saveBanners   = (v: string[])                       => dbSet('hn_banners',   v);
 export const getLogo       = (): Promise<string>                 => dbGetStr('hn_logo');
 export const saveLogo      = (v: string)                         => dbSetStr('hn_logo',      v);
-export const getOrgImage   = (): Promise<string>                 => dbGetStr('hn_org_image');
-export const saveOrgImage  = (v: string)                         => dbSetStr('hn_org_image', v);
+export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
+export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
+export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');
+export const saveLocationImage= (v: string)         => dbSetStr('hn_location_image', v);
 
 export const getClubs = async (): Promise<ClubData[]> => {
   const data = await dbGet<ClubData[]>('hn_clubs', []);

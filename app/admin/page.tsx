@@ -6,7 +6,7 @@ import {
   getClubNews, saveClubNews, getPenalties, savePenalties,
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
-  getLogo, saveLogo, getOrgImage, saveOrgImage, getClubs, saveClubs,
+  getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile,
   type Notice, type Minutes, type ClubNews, type Penalty,
@@ -173,7 +173,8 @@ function AboutTab() {
   const [orgImage, setOrgImage] = useState('');
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { getSiteContent().then(setContent); getOrgImage().then(setOrgImage); }, []);
+  const [locationImage, setLocationImage] = useState('');
+  useEffect(() => { getSiteContent().then(setContent); getOrgImage().then(setOrgImage); getLocationImage().then(setLocationImage); }, []);
   if (!content) return null;
 
   const save = () => { saveSiteContent(content); setSaved(true); setTimeout(() => setSaved(false), 2000); };
@@ -191,11 +192,19 @@ function AboutTab() {
       />
 
       {sub === 'intro' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <Field label="총동아리연합회 소개 글">
-            <textarea value={content.aboutIntro} rows={8} onChange={(e) => setContent({ ...content, aboutIntro: e.target.value })}
-              className={inputCls + ' resize-none'} placeholder="총동아리연합회 소개 내용을 입력하세요" />
-          </Field>
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <Field label="총동아리연합회 소개 글">
+              <textarea value={content.aboutIntro} rows={8} onChange={(e) => setContent({ ...content, aboutIntro: e.target.value })}
+                className={inputCls + ' resize-none'} placeholder="총동아리연합회 소개 내용을 입력하세요" />
+            </Field>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <Field label="비전">
+              <textarea value={content.aboutVision ?? ''} rows={3} onChange={(e) => setContent({ ...content, aboutVision: e.target.value })}
+                className={inputCls + ' resize-none'} placeholder="총동아리연합회 비전을 입력하세요" />
+            </Field>
+          </div>
         </div>
       )}
 
@@ -238,12 +247,34 @@ function AboutTab() {
       )}
 
       {sub === 'location' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          {([['locationAddress', '주소'], ['locationHours', '운영시간'], ['locationPhone', '전화번호'], ['locationEmail', '이메일']] as const).map(([k, l]) => (
-            <Field key={k} label={l}>
-              <input value={content[k]} onChange={(e) => setContent({ ...content, [k]: e.target.value })} className={inputCls} />
-            </Field>
-          ))}
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-700 mb-1">지도 이미지</h3>
+            <p className="text-xs text-gray-400 mb-4">오시는 길 페이지에 표시될 지도 또는 약도 이미지</p>
+            <div className="flex items-center gap-4">
+              <div className="w-48 h-28 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50">
+                {locationImage ? <img src={locationImage} alt="지도" className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-gray-400">이미지 없음</span>}
+              </div>
+              <div className="flex gap-2">
+                <label className="cursor-pointer px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+                  {locationImage ? '교체' : '업로드'}
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    const r = await readFileAsBase64(file); setLocationImage(r.url); saveLocationImage(r.url);
+                  }} />
+                </label>
+                {locationImage && <button onClick={() => { setLocationImage(''); saveLocationImage(''); }} className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">삭제</button>}
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <h3 className="font-semibold text-gray-700 mb-1">위치 정보</h3>
+            {([['locationAddress', '주소'], ['locationHours', '운영시간'], ['locationPhone', '전화번호'], ['locationEmail', '이메일']] as const).map(([k, l]) => (
+              <Field key={k} label={l}>
+                <input value={content[k]} onChange={(e) => setContent({ ...content, [k]: e.target.value })} className={inputCls} />
+              </Field>
+            ))}
+          </div>
         </div>
       )}
 
