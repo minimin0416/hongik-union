@@ -43,6 +43,8 @@ export type SiteContent = {
   askTitle: string;
   askDesc: string;
   askCategories: string[];
+  footerTitle: string;
+  footerCopyright: string;
 };
 
 /* ── 기본값 ── */
@@ -118,6 +120,8 @@ export const defaultContent: SiteContent = {
   askTitle: '질문 있어요',
   askDesc: '궁금한 점을 남겨주시면 확인 후 답변드리겠습니다.',
   askCategories: ['동아리 등록 관련', '동아리방 관련', '지원금 관련', '증명서 발급 관련', '벌점 관련', '기타'],
+  footerTitle: '홍익대학교 총동아리연합회',
+  footerCopyright: '© 2025 홍익대학교 총동아리연합회. All rights reserved.',
 };
 
 /* ── DB 헬퍼 (캐시 우선 + 백그라운드 갱신) ── */

@@ -1080,6 +1080,17 @@ function SettingsTab() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
+        <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3">푸터 (하단 정보)</h3>
+        <Field label="단체명">
+          <input value={content.footerTitle ?? ''} onChange={(e) => setContent({ ...content, footerTitle: e.target.value })} className={inputCls} placeholder="홍익대학교 총동아리연합회" />
+        </Field>
+        <Field label="저작권 문구">
+          <input value={content.footerCopyright ?? ''} onChange={(e) => setContent({ ...content, footerCopyright: e.target.value })} className={inputCls} placeholder="© 2025 홍익대학교 총동아리연합회..." />
+        </Field>
+        <p className="text-xs text-gray-400">위치·이메일은 총동아리연합회 → 오시는 길에서 수정하세요</p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
         <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3">소셜 미디어 링크</h3>
         <Field label="인스타그램 URL">
           <input value={content.instagramUrl} onChange={(e) => setContent({ ...content, instagramUrl: e.target.value })} className={inputCls} placeholder="https://instagram.com/계정명" />
