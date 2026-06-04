@@ -33,6 +33,7 @@ export type FaqItem    = { q: string; a: string };
 export type ClubBuilding = { building: string; clubs: string[] };
 export type InfoRule = { title: string; desc: string };
 export type ElectionValue = { title: string; desc: string };
+export type CalendarEvent = { id: string; title: string; startDate: string; endDate: string; color: string };
 export type SiteContent = {
   bannerSlides: BannerSlide[]; aboutIntro: string; aboutVision: string; workItems: WorkItem[];
   locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
@@ -210,8 +211,10 @@ export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
 export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
 export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');
 export const saveLocationImage= (v: string)         => dbSetStr('hn_location_image', v);
-export const getClubMapImage  = (): Promise<string> => dbGetStr('hn_club_map_image');
-export const saveClubMapImage = (v: string)         => dbSetStr('hn_club_map_image', v);
+export const getClubMapImage    = (): Promise<string>          => dbGetStr('hn_club_map_image');
+export const saveClubMapImage   = (v: string)                   => dbSetStr('hn_club_map_image', v);
+export const getCalendarEvents  = (): Promise<CalendarEvent[]>  => dbGet('hn_calendar_events', []);
+export const saveCalendarEvents = (v: CalendarEvent[])          => dbSet('hn_calendar_events', v);
 
 export const getClubs = async (): Promise<ClubData[]> => {
   const data = await dbGet<ClubData[]>('hn_clubs', []);

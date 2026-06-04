@@ -7,13 +7,13 @@ import {
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
-  getClubMapImage, saveClubMapImage, getClubs, saveClubs,
+  getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile,
   type Notice, type Minutes, type ClubNews, type Penalty,
   type FormFile, type ElectionAnnouncement, type Inquiry,
   type ClubData, type SiteContent, type Attachment,
-  type ClubBuilding, type InfoRule, type ElectionValue,
+  type ClubBuilding, type InfoRule, type ElectionValue, type CalendarEvent,
 } from '@/lib/local-store';
 
 const DEFAULT_PW = 'hongik2025admin';
@@ -446,8 +446,15 @@ function ClubsTab() {
 }
 
 /* ══════════ 탭: 소식마당 ══════════ */
+const EVENT_COLORS = [
+  { label: '파랑', value: '#3B82F6' }, { label: '초록', value: '#10B981' },
+  { label: '빨강', value: '#EF4444' }, { label: '주황', value: '#F97316' },
+  { label: '보라', value: '#8B5CF6' }, { label: '분홍', value: '#EC4899' },
+  { label: '회색', value: '#6B7280' }, { label: '남색', value: '#1D4ED8' },
+];
+
 function NewsTab() {
-  type Sub = 'notices' | 'minutes' | 'clubnews';
+  type Sub = 'notices' | 'calendar' | 'minutes' | 'clubnews';
   const [sub, setSub] = useState<Sub>('notices');
 
   // 공지사항
@@ -485,6 +492,21 @@ function NewsTab() {
   const [cnShow, setCnShow] = useState(false);
   useEffect(() => { getClubNews().then(setClubNews); }, []);
   const saveCN = (v: ClubNews[]) => { setClubNews(v); saveClubNews(v); };
+
+  // 일정
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+  const [evForm, setEvForm] = useState({ title: '', startDate: new Date().toISOString().slice(0,10), endDate: new Date().toISOString().slice(0,10), color: '#3B82F6' });
+  const [evEditId, setEvEditId] = useState<string|null>(null);
+  const [evShow, setEvShow] = useState(false);
+  useEffect(() => { getCalendarEvents().then(setCalEvents); }, []);
+  const saveCal = (v: CalendarEvent[]) => { setCalEvents(v); saveCalendarEvents(v); };
+  const submitEv = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (evEditId) saveCal(calEvents.map(ev => ev.id === evEditId ? { ...ev, ...evForm } : ev));
+    else saveCal([{ id: Date.now().toString(), ...evForm }, ...calEvents]);
+    setEvForm({ title: '', startDate: new Date().toISOString().slice(0,10), endDate: new Date().toISOString().slice(0,10), color: '#3B82F6' });
+    setEvEditId(null); setEvShow(false);
+  };
   const submitCN = (e: React.FormEvent) => {
     e.preventDefault();
     if (cnEditId) saveCN(clubNews.map((n) => n.id === cnEditId ? { ...n, ...cnForm } : n));
@@ -498,9 +520,54 @@ function NewsTab() {
         <h2 className="text-lg font-bold text-gray-800">소식마당 관리</h2>
       </div>
       <SubNav<Sub>
-        options={[['notices','공지사항'], ['minutes','회의록'], ['clubnews','동아리 소식']]}
+        options={[['notices','공지사항'], ['calendar','일정'], ['minutes','회의록'], ['clubnews','동아리 소식']]}
         value={sub} onChange={setSub}
       />
+
+      {sub === 'calendar' && (
+        <>
+          <div className="flex justify-end mb-3">
+            <Btn onClick={() => { setEvForm({ title:'', startDate:new Date().toISOString().slice(0,10), endDate:new Date().toISOString().slice(0,10), color:'#3B82F6' }); setEvEditId(null); setEvShow(true); }}>+ 일정 추가</Btn>
+          </div>
+          {evShow && (
+            <form onSubmit={submitEv} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+              <h3 className="font-semibold text-gray-700">{evEditId ? '일정 수정' : '일정 추가'}</h3>
+              <Field label="제목" required><input required value={evForm.title} onChange={(e) => setEvForm({...evForm, title:e.target.value})} className={inputCls} placeholder="일정 제목" /></Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="시작일" required><input required type="date" value={evForm.startDate} onChange={(e) => setEvForm({...evForm, startDate:e.target.value})} className={inputCls} /></Field>
+                <Field label="종료일" required><input required type="date" value={evForm.endDate} onChange={(e) => setEvForm({...evForm, endDate:e.target.value})} className={inputCls} /></Field>
+              </div>
+              <Field label="색상">
+                <div className="flex gap-2 flex-wrap mt-1">
+                  {EVENT_COLORS.map(c => (
+                    <button key={c.value} type="button" onClick={() => setEvForm({...evForm, color:c.value})}
+                      style={{ backgroundColor: c.value }}
+                      className={`w-8 h-8 rounded-full transition-transform ${evForm.color === c.value ? 'scale-125 ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                      title={c.label} />
+                  ))}
+                </div>
+              </Field>
+              <div className="flex gap-2"><Btn type="submit">{evEditId ? '수정 완료' : '추가'}</Btn><Btn variant="ghost" onClick={() => setEvShow(false)}>취소</Btn></div>
+            </form>
+          )}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            {calEvents.length === 0 && <EmptyState text="등록된 일정이 없습니다" />}
+            {calEvents.map(ev => (
+              <div key={ev.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: ev.color }} />
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium text-gray-800">{ev.title}</span>
+                  <p className="text-xs text-gray-400 mt-0.5">{ev.startDate} {ev.startDate !== ev.endDate ? `~ ${ev.endDate}` : ''}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Btn size="sm" variant="ghost" onClick={() => { setEvForm({title:ev.title,startDate:ev.startDate,endDate:ev.endDate,color:ev.color}); setEvEditId(ev.id); setEvShow(true); }}>수정</Btn>
+                  <Btn size="sm" variant="danger" onClick={() => { if(confirm('삭제?')) saveCal(calEvents.filter(x=>x.id!==ev.id)); }}>삭제</Btn>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {sub === 'notices' && (
         <>
