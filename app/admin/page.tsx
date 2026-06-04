@@ -929,19 +929,42 @@ function SettingsTab() {
 }
 
 /* ══════════ 메인 ══════════ */
+const TIMEOUT_MS = 10 * 60 * 1000; // 10분
+
 export default function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('about');
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { if (localStorage.getItem('admin_session') === 'true') setLoggedIn(true); }, []);
+  const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
+
+  const resetTimer = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(logout, TIMEOUT_MS);
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('admin_session') === 'true') setLoggedIn(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(e => window.addEventListener(e, resetTimer));
+    resetTimer();
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [loggedIn]);
+
   const login = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === getStoredPW()) { setLoggedIn(true); localStorage.setItem('admin_session', 'true'); }
     else setError('비밀번호가 올바르지 않습니다.');
   };
-  const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
 
   if (!loggedIn) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
