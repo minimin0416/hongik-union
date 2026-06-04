@@ -60,6 +60,7 @@ const navItems = [
     submenu: [
       { title: '자주 묻는 질문', href: '/contact/faq' },
       { title: '질문 있어요', href: '/contact/ask' },
+      { title: 'Q&A 게시판', href: '/contact/qna' },
     ],
   },
 ];

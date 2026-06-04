@@ -6,12 +6,14 @@ import {
   getClubNews, saveClubNews, getPenalties, savePenalties,
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
-  getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage, getClubs, saveClubs,
+  getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
+  getClubMapImage, saveClubMapImage, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile,
   type Notice, type Minutes, type ClubNews, type Penalty,
   type FormFile, type ElectionAnnouncement, type Inquiry,
   type ClubData, type SiteContent, type Attachment,
+  type ClubBuilding, type InfoRule, type ElectionValue,
 } from '@/lib/local-store';
 
 const DEFAULT_PW = 'hongik2025admin';
@@ -301,6 +303,10 @@ function AboutTab() {
 const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', contact: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], instagram: '', imageUrl: '' });
 
 function ClubsTab() {
+  type Sub = 'list' | 'location';
+  const [sub, setSub] = useState<Sub>('list');
+
+  // 동아리 목록
   const [clubs, setClubs] = useState<ClubData[]>([]);
   const [form, setForm] = useState(emptyClub());
   const [editId, setEditId] = useState<number | null>(null);
@@ -308,76 +314,131 @@ function ClubsTab() {
   const [filter, setFilter] = useState('전체');
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { getClubs().then(setClubs); }, []);
-  const save = (v: ClubData[]) => { setClubs(v); saveClubs(v); };
-  const updArr = (f: 'activities' | 'targets', i: number, v: string) => { const a = [...form[f]]; a[i] = v; setForm({ ...form, [f]: a }); };
-  const addArr = (f: 'activities' | 'targets') => setForm({ ...form, [f]: [...form[f], ''] });
-  const remArr = (f: 'activities' | 'targets', i: number) => setForm({ ...form, [f]: form[f].length > 1 ? form[f].filter((_, j) => j !== i) : [''] });
+  const saveList = (v: ClubData[]) => { setClubs(v); saveClubs(v); };
   const startEdit = (c: ClubData) => {
     setForm({ name: c.name, category: c.category, room: c.room, president: c.president, contact: c.contact, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], instagram: c.instagram, imageUrl: c.imageUrl || '' });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editId !== null) save(clubs.map((c) => c.id === editId ? { ...c, ...form } : c));
-    else { const id = clubs.length > 0 ? Math.max(...clubs.map(c => c.id)) + 1 : 1; save([...clubs, { id, ...form }]); }
+    if (editId !== null) saveList(clubs.map((c) => c.id === editId ? { ...c, ...form } : c));
+    else { const id = clubs.length > 0 ? Math.max(...clubs.map(c => c.id)) + 1 : 1; saveList([...clubs, { id, ...form }]); }
     setForm(emptyClub()); setEditId(null); setShow(false);
   };
+
+  // 동아리방 위치
+  const [content, setContent] = useState<SiteContent | null>(null);
+  const [clubMapImage, setClubMapImage] = useState('');
+  const [locSaved, setLocSaved] = useState(false);
+  useEffect(() => { getSiteContent().then(setContent); getClubMapImage().then(setClubMapImage); }, []);
+  const saveLocation = () => { if (content) { saveSiteContent(content); setLocSaved(true); setTimeout(() => setLocSaved(false), 2000); } };
 
   const filtered = clubs.filter((c) => filter === '전체' || c.category === filter);
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-gray-800">동아리 관리</h2>
-        <Btn onClick={() => { setForm(emptyClub()); setEditId(null); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100); }}>+ 동아리 추가</Btn>
+        <h2 className="text-lg font-bold text-gray-800">동아리 소개 관리</h2>
+        {sub === 'list' && <Btn onClick={() => { setForm(emptyClub()); setEditId(null); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100); }}>+ 동아리 추가</Btn>}
+        {sub === 'location' && <div className="flex items-center gap-3"><SavedBadge show={locSaved}/><Btn onClick={saveLocation}>저장</Btn></div>}
       </div>
-      <div className="flex gap-1.5 flex-wrap mb-4">
-        {['전체', ...CATEGORIES].map((c) => (
-          <button key={c} onClick={() => setFilter(c)} className={cls('px-3 py-1 rounded-full text-xs font-medium border transition-colors', filter === c ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500')}>{c}</button>
-        ))}
-      </div>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-        {filtered.length === 0 && <EmptyState text="동아리가 없습니다" />}
-        {filtered.map((c) => (
-          <div key={c.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-gray-800 mr-2">{c.name}</span>
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c.category}</span>
-              <p className="text-xs text-gray-400 mt-0.5">{c.room} · 회장: {c.president || '미입력'}</p>
+      <SubNav<Sub> options={[['list','동아리 목록'], ['location','동아리방 위치']]} value={sub} onChange={setSub} />
+
+      {sub === 'list' && (
+        <>
+          <div className="flex gap-1.5 flex-wrap mb-4">
+            {['전체', ...CATEGORIES].map((c) => (
+              <button key={c} onClick={() => setFilter(c)} className={cls('px-3 py-1 rounded-full text-xs font-medium border transition-colors', filter === c ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500')}>{c}</button>
+            ))}
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+            {filtered.length === 0 && <EmptyState text="동아리가 없습니다" />}
+            {filtered.map((c) => (
+              <div key={c.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium text-gray-800 mr-2">{c.name}</span>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c.category}</span>
+                  <p className="text-xs text-gray-400 mt-0.5">{c.room} · 회장: {c.president || '미입력'}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Btn size="sm" variant="ghost" onClick={() => startEdit(c)}>수정</Btn>
+                  <Btn size="sm" variant="danger" onClick={() => { if (confirm('삭제?')) saveList(clubs.filter((x) => x.id !== c.id)); }}>삭제</Btn>
+                </div>
+              </div>
+            ))}
+          </div>
+          {show && (
+            <div ref={ref} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+              <h3 className="font-bold text-gray-800 mb-4">{editId !== null ? '동아리 수정' : '동아리 추가'}</h3>
+              <form onSubmit={submit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field label="동아리명" required><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} /></Field>
+                  <Field label="분과">
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputCls + ' bg-white'}>
+                      {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
+                  <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
+                  <Field label="연락처"><input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className={inputCls} placeholder="010-0000-0000" /></Field>
+                  <Field label="인스타그램"><input value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} className={inputCls} placeholder="@계정명" /></Field>
+                  <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
+                  <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
+                </div>
+                <Field label="한 줄 소개"><input value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} className={inputCls} /></Field>
+                <Field label="상세 소개"><textarea value={form.intro} onChange={(e) => setForm({ ...form, intro: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
+                <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
+                <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
+                <Field label="소개 이미지">
+                  <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
+                </Field>
+                <div className="flex gap-2"><Btn type="submit">{editId !== null ? '수정 완료' : '추가 완료'}</Btn><Btn variant="ghost" onClick={() => { setShow(false); setEditId(null); }}>취소</Btn></div>
+              </form>
             </div>
-            <div className="flex gap-1">
-              <Btn size="sm" variant="ghost" onClick={() => startEdit(c)}>수정</Btn>
-              <Btn size="sm" variant="danger" onClick={() => { if (confirm('삭제?')) save(clubs.filter((x) => x.id !== c.id)); }}>삭제</Btn>
+          )}
+        </>
+      )}
+
+      {sub === 'location' && content && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-700 mb-1">캠퍼스 지도 이미지</h3>
+            <p className="text-xs text-gray-400 mb-4">동아리방 위치 페이지 상단에 표시될 지도 이미지</p>
+            <div className="flex items-center gap-4">
+              <div className="w-48 h-28 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50">
+                {clubMapImage ? <img src={clubMapImage} alt="캠퍼스 지도" className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-gray-400">이미지 없음</span>}
+              </div>
+              <div className="flex gap-2">
+                <label className="cursor-pointer px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+                  {clubMapImage ? '교체' : '업로드'}
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    const r = await readFileAsBase64(file); setClubMapImage(r.url); saveClubMapImage(r.url);
+                  }} />
+                </label>
+                {clubMapImage && <button onClick={() => { setClubMapImage(''); saveClubMapImage(''); }} className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">삭제</button>}
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-      {show && (
-        <div ref={ref} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-          <h3 className="font-bold text-gray-800 mb-4">{editId !== null ? '동아리 수정' : '동아리 추가'}</h3>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="동아리명" required><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} /></Field>
-              <Field label="분과">
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputCls + ' bg-white'}>
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
-              <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
-              <Field label="연락처"><input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className={inputCls} placeholder="010-0000-0000" /></Field>
-              <Field label="인스타그램"><input value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} className={inputCls} placeholder="@계정명" /></Field>
-              <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
-              <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
-            </div>
-            <Field label="한 줄 소개"><input value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} className={inputCls} /></Field>
-            <Field label="상세 소개"><textarea value={form.intro} onChange={(e) => setForm({ ...form, intro: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
-            <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
-            <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
-            <Field label="소개 이미지">
-              <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
-            </Field>
-            <div className="flex gap-2"><Btn type="submit">{editId !== null ? '수정 완료' : '추가 완료'}</Btn><Btn variant="ghost" onClick={() => { setShow(false); setEditId(null); }}>취소</Btn></div>
-          </form>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-700 mb-3">건물별 동아리방 목록</h3>
+            {(content.clubBuildings ?? []).map((b, bi) => (
+              <div key={bi} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex justify-between mb-2">
+                  <input value={b.building} placeholder="건물명 (예: A동)" onChange={(e) => { const a=[...content.clubBuildings]; a[bi]={...a[bi],building:e.target.value}; setContent({...content,clubBuildings:a}); }} className={inputCls+' w-32'} />
+                  <button onClick={() => setContent({...content, clubBuildings: content.clubBuildings.filter((_,i)=>i!==bi)})} className="text-xs text-red-400 hover:text-red-600">건물 삭제</button>
+                </div>
+                {b.clubs.map((club, ci) => (
+                  <div key={ci} className="flex gap-2 mb-1.5">
+                    <input value={club} placeholder="동아리명 (호수)" onChange={(e) => { const a=[...content.clubBuildings]; const clubs=[...a[bi].clubs]; clubs[ci]=e.target.value; a[bi]={...a[bi],clubs}; setContent({...content,clubBuildings:a}); }} className={inputCls} />
+                    <button onClick={() => { const a=[...content.clubBuildings]; a[bi]={...a[bi],clubs:a[bi].clubs.filter((_,i)=>i!==ci)}; setContent({...content,clubBuildings:a}); }} className="text-gray-400 hover:text-red-500 text-lg leading-none w-7">×</button>
+                  </div>
+                ))}
+                <button onClick={() => { const a=[...content.clubBuildings]; a[bi]={...a[bi],clubs:[...a[bi].clubs,'']}; setContent({...content,clubBuildings:a}); }} className="text-xs text-blue-600 hover:underline">+ 동아리 추가</button>
+              </div>
+            ))}
+            <button onClick={() => setContent({...content, clubBuildings:[...(content.clubBuildings??[]),{building:'',clubs:['']}]})} className="text-xs text-blue-600 hover:underline">+ 건물 추가</button>
+          </div>
+          <button onClick={saveLocation} className={cls('w-full py-3 rounded-xl text-sm font-bold transition-all', locSaved?'bg-green-500 text-white':'bg-gray-800 text-white hover:bg-gray-700')}>{locSaved?'✓ 저장 완료!':'저장하기'}</button>
         </div>
       )}
     </div>
@@ -537,8 +598,12 @@ function NewsTab() {
 
 /* ══════════ 탭: 정보마당 ══════════ */
 function InfoTab() {
-  type Sub = 'forms' | 'penalty';
-  const [sub, setSub] = useState<Sub>('forms');
+  type Sub = 'rules' | 'forms' | 'penalty';
+  const [sub, setSub] = useState<Sub>('rules');
+  const [content, setContent] = useState<SiteContent | null>(null);
+  const [ruleSaved, setRuleSaved] = useState(false);
+  useEffect(() => { getSiteContent().then(setContent); }, []);
+  const saveRules = () => { if (content) { saveSiteContent(content); setRuleSaved(true); setTimeout(() => setRuleSaved(false), 2000); } };
 
   const [forms, setForms] = useState<FormFile[]>([]);
   const [fForm, setFForm] = useState({ name: '', description: '', fileType: 'HWP', updatedAt: new Date().toISOString().slice(0, 7), attachment: undefined as Attachment | undefined });
@@ -571,7 +636,26 @@ function InfoTab() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-800">정보마당 관리</h2>
       </div>
-      <SubNav<Sub> options={[['forms','양식 파일'], ['penalty','벌점 현황']]} value={sub} onChange={setSub} />
+      <SubNav<Sub> options={[['rules','규칙'], ['forms','양식 파일'], ['penalty','벌점 현황']]} value={sub} onChange={setSub} />
+
+      {sub === 'rules' && content && (
+        <div>
+          <div className="space-y-3 mb-4">
+            {(content.infoRules ?? []).map((r, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-400">규칙 {i+1}</span>
+                  <button onClick={() => setContent({...content, infoRules: content.infoRules.filter((_,j)=>j!==i)})} className="text-xs text-red-400">삭제</button>
+                </div>
+                <input value={r.title} placeholder="규칙 제목" onChange={(e) => { const a=[...content.infoRules]; a[i]={...a[i],title:e.target.value}; setContent({...content,infoRules:a}); }} className={inputCls+' mb-2'} />
+                <input value={r.desc} placeholder="설명" onChange={(e) => { const a=[...content.infoRules]; a[i]={...a[i],desc:e.target.value}; setContent({...content,infoRules:a}); }} className={inputCls} />
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setContent({...content, infoRules:[...(content.infoRules??[]),{title:'',desc:''}]})} className="text-xs text-blue-600 hover:underline mb-4 block">+ 규칙 추가</button>
+          <div className="flex items-center gap-3"><SavedBadge show={ruleSaved}/><Btn onClick={saveRules}>저장</Btn></div>
+        </div>
+      )}
 
       {sub === 'forms' && (
         <>
@@ -661,11 +745,25 @@ function ElectionTab() {
       <SubNav<Sub> options={[['intro','소개'], ['announce','선거 공고']]} value={sub} onChange={setSub} />
 
       {sub === 'intro' && (
-        <div>
-          <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
             <Field label="선거관리위원회 소개 글">
-              <textarea value={content.electionIntro} rows={8} onChange={(e) => setContent({ ...content, electionIntro: e.target.value })} className={inputCls + ' resize-none'} />
+              <textarea value={content.electionIntro} rows={6} onChange={(e) => setContent({ ...content, electionIntro: e.target.value })} className={inputCls + ' resize-none'} />
             </Field>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-700 mb-3">핵심 가치</h3>
+            {(content.electionValues ?? []).map((v, i) => (
+              <div key={i} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-400">가치 {i+1}</span>
+                  <button onClick={() => setContent({...content, electionValues: content.electionValues.filter((_,j)=>j!==i)})} className="text-xs text-red-400">삭제</button>
+                </div>
+                <input value={v.title} placeholder="가치 이름 (예: 공정성)" onChange={(e) => { const a=[...content.electionValues]; a[i]={...a[i],title:e.target.value}; setContent({...content,electionValues:a}); }} className={inputCls+' mb-2'} />
+                <input value={v.desc} placeholder="설명" onChange={(e) => { const a=[...content.electionValues]; a[i]={...a[i],desc:e.target.value}; setContent({...content,electionValues:a}); }} className={inputCls} />
+              </div>
+            ))}
+            <button onClick={() => setContent({...content, electionValues:[...(content.electionValues??[]),{title:'',desc:''}]})} className="text-xs text-blue-600 hover:underline">+ 가치 추가</button>
           </div>
           <div className="flex items-center gap-3">
             <SavedBadge show={saved} />
@@ -710,7 +808,7 @@ function ElectionTab() {
 
 /* ══════════ 탭: 문의사항 ══════════ */
 function ContactTab() {
-  type Sub = 'faq' | 'inquiries';
+  type Sub = 'faq' | 'inquiries' | 'askpage';
   const [sub, setSub] = useState<Sub>('faq');
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saved, setSaved] = useState(false);
@@ -738,7 +836,7 @@ function ContactTab() {
         </h2>
       </div>
       <SubNav<Sub>
-        options={[['faq', 'FAQ'], ['inquiries', pending > 0 ? `문의 확인 (${pending})` : '문의 확인']]}
+        options={[['faq', 'FAQ'], ['inquiries', pending > 0 ? `문의 확인 (${pending})` : '문의 확인'], ['askpage', '문의 페이지 설정']]}
         value={sub} onChange={setSub}
       />
 
@@ -796,14 +894,61 @@ function ContactTab() {
                   {[['이름', selected.name], ['이메일', selected.email], ['연락처', selected.contact || '미입력'], ['유형', selected.category], ['접수일', selected.createdAt]].map(([l, v]) => (
                     <div key={l} className="flex gap-3"><span className="text-gray-500 w-14 flex-shrink-0">{l}</span><span className="text-gray-800">{v}</span></div>
                   ))}
+                  <div className="flex gap-3"><span className="text-gray-500 w-14 flex-shrink-0">공개</span><span className={selected.isPublic ? 'text-green-600 font-medium' : 'text-gray-400'}>{selected.isPublic ? '공개' : '비공개'}</span></div>
                   <div><p className="text-gray-500 mb-1">내용</p><p className="text-gray-800 bg-gray-50 rounded-lg p-3 text-sm leading-relaxed">{selected.message}</p></div>
+                  <div>
+                    <p className="text-gray-500 mb-1">답변</p>
+                    <textarea
+                      value={selected.answer ?? ''}
+                      onChange={(e) => setSelected({ ...selected, answer: e.target.value })}
+                      rows={4} placeholder="답변을 입력하세요"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500 resize-none"
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {selected.status === 'pending' && <Btn variant="blue" onClick={() => confirmI(selected.id)}>확인 완료</Btn>}
+                <div className="flex gap-2 flex-wrap">
+                  <Btn variant="blue" onClick={() => {
+                    const updated = { ...selected, status: 'confirmed' as const, answeredAt: new Date().toISOString().slice(0,10) };
+                    const v = list.map(i => i.id === selected.id ? updated : i);
+                    saveI(v); setSelected(updated);
+                  }}>답변 저장 & 확인 완료</Btn>
+                  <Btn variant="ghost" onClick={() => {
+                    const updated = { ...selected, isPublic: !selected.isPublic };
+                    const v = list.map(i => i.id === selected.id ? updated : i);
+                    saveI(v); setSelected(updated);
+                  }}>{selected.isPublic ? '비공개로 변경' : '공개로 변경'}</Btn>
                   <Btn variant="danger" onClick={() => delI(selected.id)}>삭제</Btn>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {sub === 'askpage' && content && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3">문의 페이지 텍스트</h3>
+            <Field label="페이지 제목">
+              <input value={content.askTitle ?? ''} onChange={(e) => setContent({...content, askTitle: e.target.value})} className={inputCls} placeholder="질문 있어요" />
+            </Field>
+            <Field label="안내 문구">
+              <input value={content.askDesc ?? ''} onChange={(e) => setContent({...content, askDesc: e.target.value})} className={inputCls} placeholder="궁금한 점을 남겨주시면..." />
+            </Field>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-700 mb-3">문의 유형 목록</h3>
+            {(content.askCategories ?? []).map((cat, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input value={cat} onChange={(e) => { const a=[...(content.askCategories??[])]; a[i]=e.target.value; setContent({...content,askCategories:a}); }} className={inputCls} />
+                <button onClick={() => setContent({...content, askCategories: content.askCategories.filter((_,j)=>j!==i)})} className="text-gray-400 hover:text-red-500 text-lg leading-none w-7">×</button>
+              </div>
+            ))}
+            <button onClick={() => setContent({...content, askCategories:[...(content.askCategories??[]),'새 유형']})} className="text-xs text-blue-600 hover:underline mt-1 block">+ 유형 추가</button>
+          </div>
+          <div className="flex items-center gap-3">
+            <SavedBadge show={saved}/>
+            <Btn onClick={save}>저장</Btn>
           </div>
         </div>
       )}

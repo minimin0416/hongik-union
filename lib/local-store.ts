@@ -26,14 +26,23 @@ export type ClubNews = { id: string; club: string; category: string; title: stri
 export type Penalty = { id: string; club: string; reason: string; points: number; date: string };
 export type FormFile = { id: string; name: string; description: string; fileType: string; updatedAt: string; attachment?: Attachment };
 export type ElectionAnnouncement = { id: string; title: string; content: string; date: string; status: '예정' | '진행중' | '완료'; attachment?: Attachment };
-export type Inquiry = { id: string; name: string; email: string; contact: string; category: string; message: string; status: 'pending' | 'confirmed'; createdAt: string };
+export type Inquiry = { id: string; name: string; email: string; contact: string; category: string; message: string; status: 'pending' | 'confirmed'; createdAt: string; isPublic: boolean; answer?: string; answeredAt?: string };
 export type BannerSlide = { title: string; subtitle: string };
 export type WorkItem   = { title: string; desc: string };
 export type FaqItem    = { q: string; a: string };
+export type ClubBuilding = { building: string; clubs: string[] };
+export type InfoRule = { title: string; desc: string };
+export type ElectionValue = { title: string; desc: string };
 export type SiteContent = {
   bannerSlides: BannerSlide[]; aboutIntro: string; aboutVision: string; workItems: WorkItem[];
   locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
-  rules: string; faqs: FaqItem[]; electionIntro: string; instagramUrl: string; kakaoUrl: string;
+  rules: string; faqs: FaqItem[]; electionIntro: string; electionValues: ElectionValue[];
+  instagramUrl: string; kakaoUrl: string;
+  clubBuildings: ClubBuilding[];
+  infoRules: InfoRule[];
+  askTitle: string;
+  askDesc: string;
+  askCategories: string[];
 };
 
 /* ── 기본값 ── */
@@ -84,8 +93,31 @@ export const defaultContent: SiteContent = {
     { q: '총동아리연합회 운영시간은 언제인가요?', a: '평일 오전 10시부터 오후 5시까지 운영합니다. G동 301-1호에 위치합니다.' },
   ],
   electionIntro: '동아리선거관리위원회(이하 선관위)는 총동아리연합회 임원 선거를 공정하고 투명하게 관리하기 위해 구성된 독립적인 기구입니다.',
+  electionValues: [
+    { title: '공정성', desc: '독립적으로 운영하여 선거의 공정성 보장' },
+    { title: '투명성', desc: '모든 선거 과정을 공개하여 투명성 확보' },
+    { title: '적법성', desc: '관련 규정에 따라 적법하게 선거 진행' },
+  ],
   instagramUrl: '',
   kakaoUrl: '',
+  clubBuildings: [
+    { building: 'A동', clubs: ['홍익극회 (101호)', '홍익뮤지컬 (102호)'] },
+    { building: 'B동', clubs: ['홍익등산 (302호)', '홍익사이클 (303호)'] },
+    { building: 'D동', clubs: ['홍익밴드 (205호)', '홍익재즈 (206호)', 'D동 연습실 (207호)'] },
+    { building: 'E동', clubs: ['홍익영어토론 (401호)', '홍익법학 (402호)'] },
+    { building: 'F동', clubs: ['홍익사진 (503호)', '홍익미술 (504호)'] },
+    { building: 'G동', clubs: ['총동아리연합회실 (301-1호)', '홍익봉사 (105호)', '홍익CCC (201호)'] },
+  ],
+  infoRules: [
+    { title: '동아리 등록 규정', desc: '신규 동아리 등록 및 등록 갱신 관련 규정' },
+    { title: '동아리방 사용 규정', desc: '동아리방 사용 방법, 금지 사항, 청소 의무 등' },
+    { title: '활동 지원금 관리 규정', desc: '지원금 신청, 사용, 정산 관련 규정' },
+    { title: 'D동 연습실 이용 규정', desc: '연습실 예약, 사용 가능 시간, 주의사항' },
+    { title: '벌점 부과 기준', desc: '벌점 부과 사유, 기준, 이의신청 절차' },
+  ],
+  askTitle: '질문 있어요',
+  askDesc: '궁금한 점을 남겨주시면 확인 후 답변드리겠습니다.',
+  askCategories: ['동아리 등록 관련', '동아리방 관련', '지원금 관련', '증명서 발급 관련', '벌점 관련', '기타'],
 };
 
 /* ── DB 헬퍼 (캐시 우선 + 백그라운드 갱신) ── */
@@ -174,6 +206,8 @@ export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
 export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
 export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');
 export const saveLocationImage= (v: string)         => dbSetStr('hn_location_image', v);
+export const getClubMapImage  = (): Promise<string> => dbGetStr('hn_club_map_image');
+export const saveClubMapImage = (v: string)         => dbSetStr('hn_club_map_image', v);
 
 export const getClubs = async (): Promise<ClubData[]> => {
   const data = await dbGet<ClubData[]>('hn_clubs', []);
