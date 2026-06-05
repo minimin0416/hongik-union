@@ -7,6 +7,7 @@ import {
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
+  compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile,
@@ -58,7 +59,7 @@ function FileInput({ onUpload, current }: { onUpload: (a: Attachment) => void; c
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert('파일 크기는 5MB 이하로 해주세요'); return; }
+    if (file.size > 20 * 1024 * 1024) { alert('파일 크기는 20MB 이하로 해주세요'); return; }
     const result = await readFileAsBase64(file);
     onUpload(result);
     if (ref.current) ref.current.value = '';
@@ -79,10 +80,10 @@ function FileInput({ onUpload, current }: { onUpload: (a: Attachment) => void; c
   );
 }
 
-function ImageInput({ onUpload, current, onRemove }: { onUpload: (url: string) => void; current?: string; onRemove: () => void }) {
+function ImageInput({ onUpload, current, onRemove, maxW = 1200 }: { onUpload: (url: string) => void; current?: string; onRemove: () => void; maxW?: number }) {
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const r = await readFileAsBase64(file); onUpload(r.url);
+    const url = await compressImage(file, maxW, 0.85); onUpload(url);
   };
   return (
     <div>
@@ -1030,12 +1031,14 @@ function ImagesTab() {
   useEffect(() => { getBanners().then(setBanners); getLogo().then(setLogo); }, []);
   const handleBanner = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const r = await readFileAsBase64(file); const u = [...banners]; u[idx] = r.url; setBanners(u); saveBanners(u);
+    const url = await compressImage(file, 1920, 0.85);
+    const u = [...banners]; u[idx] = url; setBanners(u); saveBanners(u);
   };
   const removeBanner = (idx: number) => { const u = [...banners]; u[idx] = ''; setBanners(u); saveBanners(u); };
   const handleLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const r = await readFileAsBase64(file); setLogo(r.url); saveLogo(r.url);
+    const url = await compressImage(file, 400, 0.9);
+    setLogo(url); saveLogo(url);
   };
 
   return (

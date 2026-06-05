@@ -10,6 +10,30 @@ export const readFileAsBase64 = (file: File): Promise<{ url: string; name: strin
     reader.readAsDataURL(file);
   });
 
+// 이미지 자동 압축 (최대 가로 maxW px, quality 0~1)
+export function compressImage(file: File, maxW = 1920, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export const downloadFile = (url: string, name: string) => {
   const a = document.createElement('a');
   a.href = url;
