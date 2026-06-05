@@ -83,15 +83,14 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0 mr-8">
-            {logoUrl ? (
-              <img src={logoUrl} alt="로고" className="h-10 max-w-[160px] object-contain" />
-            ) : (
-              <div className="flex flex-col leading-tight">
-                <span className="font-black text-base text-gray-900 tracking-tight">홍익대학교</span>
-                <span className="text-xs text-gray-400 tracking-widest uppercase font-medium">HONGIK UNIVERSITY</span>
-              </div>
-            )}
+          <Link href="/" className="flex-shrink-0 mr-8">
+            {logoUrl
+              ? <img src={logoUrl} alt="로고" style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }} />
+              : <div className="flex flex-col leading-tight">
+                  <span className="font-black text-base text-gray-900 tracking-tight">홍익대학교</span>
+                  <span className="text-xs text-gray-400 tracking-widest uppercase font-medium">HONGIK UNIVERSITY</span>
+                </div>
+            }
           </Link>
 
           {/* Desktop nav */}

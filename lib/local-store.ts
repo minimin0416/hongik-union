@@ -153,14 +153,7 @@ export const defaultContent: SiteContent = {
 async function dbGet<T>(key: string, def: T): Promise<T> {
   if (typeof window === 'undefined') return def;
   const cached = localStorage.getItem(key);
-  if (cached) {
-    // 캐시 즉시 반환, 백그라운드에서 Supabase 갱신
-    fetch(`/api/data?key=${encodeURIComponent(key)}`)
-      .then(r => r.json())
-      .then(v => { if (v !== null) localStorage.setItem(key, v); })
-      .catch(() => {});
-    return JSON.parse(cached) as T;
-  }
+  if (cached) return JSON.parse(cached) as T;
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
@@ -185,13 +178,7 @@ async function dbSet(key: string, value: unknown): Promise<void> {
 async function dbGetStr(key: string): Promise<string> {
   if (typeof window === 'undefined') return '';
   const cached = localStorage.getItem(key);
-  if (cached) {
-    fetch(`/api/data?key=${encodeURIComponent(key)}`)
-      .then(r => r.json())
-      .then(v => { if (v !== null) localStorage.setItem(key, v); })
-      .catch(() => {});
-    return cached;
-  }
+  if (cached) return cached;
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
@@ -229,8 +216,14 @@ export const getInquiries  = (): Promise<Inquiry[]>              => dbGet('hn_in
 export const saveInquiries = (v: Inquiry[])                      => dbSet('hn_inquiries', v);
 export const getBanners    = (): Promise<string[]>               => dbGet('hn_banners',   ['', '', '']);
 export const saveBanners   = (v: string[])                       => dbSet('hn_banners',   v);
-export const getLogo       = (): Promise<string>                 => dbGetStr('hn_logo');
-export const saveLogo      = (v: string)                         => dbSetStr('hn_logo',      v);
+export const getLogo = (): Promise<string> => {
+  if (typeof window !== 'undefined') localStorage.removeItem('hn_logo');
+  return dbGetStr('hn_logo');
+};
+export const saveLogo = (v: string) => {
+  if (typeof window !== 'undefined') localStorage.removeItem('hn_logo');
+  return dbSetStr('hn_logo', v);
+};
 export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
 export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
 export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');

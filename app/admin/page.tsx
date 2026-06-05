@@ -1028,17 +1028,38 @@ function ContactTab() {
 function ImagesTab() {
   const [banners, setBanners] = useState(['', '', '']);
   const [logo, setLogo] = useState('');
-  useEffect(() => { getBanners().then(setBanners); getLogo().then(setLogo); }, []);
+  useEffect(() => {
+    getBanners().then(setBanners);
+    getLogo().then(setLogo);
+  }, []);
   const handleBanner = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     const url = await compressImage(file, 1920, 0.85);
     const u = [...banners]; u[idx] = url; setBanners(u); saveBanners(u);
   };
   const removeBanner = (idx: number) => { const u = [...banners]; u[idx] = ''; setBanners(u); saveBanners(u); };
-  const handleLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const url = await compressImage(file, 400, 0.9);
-    setLogo(url); saveLogo(url);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 400;
+        const s = img.width > maxW ? maxW / img.width : 1;
+        const w = Math.round(img.width * s) || 1;
+        const h = Math.round(img.height * s) || 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const url = canvas.toDataURL('image/png');
+        setLogo(url);
+        saveLogo(url);
+      };
+      img.src = ev.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -1072,16 +1093,25 @@ function ImagesTab() {
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h3 className="font-semibold text-gray-700 mb-1">로고</h3>
-        <p className="text-xs text-gray-400 mb-4">권장: PNG 투명 배경 · 가로 200px 이상</p>
+        <p className="text-xs text-gray-400 mb-4">권장: PNG · 가로 200px 이상</p>
         <div className="flex items-center gap-4">
           <div className="w-40 h-16 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
-            {logo ? <img src={logo} alt="로고" className="max-h-12 max-w-full object-contain" /> : <span className="text-xs text-gray-400">로고 없음</span>}
+            {logo
+              ? <img src={logo} alt="로고" style={{ maxHeight: '48px', maxWidth: '100%', objectFit: 'contain' }} />
+              : <span className="text-xs text-gray-400">로고 없음</span>
+            }
           </div>
           <div className="flex gap-2">
             <label className="cursor-pointer px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
-              {logo ? '로고 교체' : '로고 업로드'}<input type="file" accept="image/*" className="hidden" onChange={handleLogo} />
+              {logo ? '로고 교체' : '로고 업로드'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogo} />
             </label>
-            {logo && <button onClick={() => { setLogo(''); saveLogo(''); }} className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">삭제</button>}
+            {logo && (
+              <button onClick={() => { setLogo(''); saveLogo(''); }}
+                className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">
+                삭제
+              </button>
+            )}
           </div>
         </div>
       </div>

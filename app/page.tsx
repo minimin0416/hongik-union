@@ -2,23 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getNotices, getSiteContent, getBanners, type Notice, type BannerSlide } from '@/lib/local-store';
+import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, type Notice, type BannerSlide, type CalendarEvent } from '@/lib/local-store';
+import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
+
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+function toDateStr(y: number, m: number, d: number) {
+  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function getEventsForDay(events: CalendarEvent[], date: string) {
+  return events.filter(e => e.startDate <= date && e.endDate >= date);
+}
 
 function SimpleCalendar() {
   const today = new Date();
+  const todayStr = toDateStr(today.getFullYear(), today.getMonth(), today.getDate());
   const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+  useEffect(() => { getCalendarEvents().then(setEvents); }, []);
+
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const dayNames = ['일','월','화','수','목','금','토'];
+
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let i = 1; i <= daysInMonth; i++) cells.push(i);
-  const isToday = (day: number) =>
-    day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   return (
     <div>
@@ -27,30 +44,62 @@ function SimpleCalendar() {
           className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 transition-colors text-gray-500 text-sm">
           ‹
         </button>
-        <span className="text-sm font-semibold text-gray-700">{year}년 {monthNames[month]}</span>
+        <span className="text-sm font-semibold text-gray-700">{year}년 {month + 1}월</span>
         <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
           className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 transition-colors text-gray-500 text-sm">
           ›
         </button>
       </div>
+
+      {/* 요일 헤더 */}
       <div className="grid grid-cols-7 mb-1">
-        {dayNames.map((d, i) => (
+        {DAY_NAMES.map((d, i) => (
           <div key={d} className={`text-center text-xs font-medium py-1 ${i===0?'text-red-500':i===6?'text-blue-500':'text-gray-500'}`}>{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7">
-        {cells.map((day, idx) => (
-          <div key={idx} className={`aspect-square flex items-center justify-center text-xs rounded transition-colors ${
-            day===null ? '' :
-            isToday(day) ? 'bg-gray-800 text-white font-bold rounded-full' :
-            idx%7===0 ? 'text-red-400 hover:bg-red-50 cursor-pointer' :
-            idx%7===6 ? 'text-blue-400 hover:bg-blue-50 cursor-pointer' :
-            'text-gray-600 hover:bg-gray-100 cursor-pointer'
-          }`}>
-            {day}
-          </div>
-        ))}
-      </div>
+
+      {/* 주 행 */}
+      {weeks.map((week, wi) => (
+        <div key={wi} className="grid grid-cols-7 border-b border-gray-100 last:border-0">
+          {week.map((day, di) => {
+            if (!day) return <div key={di} className="min-h-14 border-r border-gray-100 last:border-0 bg-gray-50/30" />;
+
+            const dateStr = toDateStr(year, month, day);
+            const holiday = getHoliday(dateStr);
+            const isToday = dateStr === todayStr;
+            const dayEvents = getEventsForDay(events, dateStr);
+            const isSun = di === 0;
+            const isSat = di === 6;
+            const isRed = isSun || !!holiday;
+
+            return (
+              <div key={di} className="min-h-14 border-r border-gray-100 last:border-0 p-1">
+                <span className={`inline-flex w-5 h-5 items-center justify-center rounded-full text-xs font-semibold
+                  ${isToday ? 'bg-gray-800 text-white' : isRed ? 'text-red-500' : isSat ? 'text-blue-500' : 'text-gray-700'}`}>
+                  {day}
+                </span>
+                {holiday && <div className="text-red-500 text-[9px] leading-tight font-medium truncate">{holiday}</div>}
+                <div className="space-y-0.5 mt-0.5">
+                  {dayEvents.map((ev) => {
+                    const isStart = ev.startDate === dateStr;
+                    const isEnd = ev.endDate === dateStr;
+                    const isSingle = isStart && isEnd;
+                    return (
+                      <div key={ev.id}
+                        style={{ backgroundColor: ev.color || '#3B82F6' }}
+                        className={`text-white text-[9px] leading-3.5 px-1 py-0.5 overflow-hidden
+                          ${isSingle ? 'rounded' : isStart ? 'rounded-l' : isEnd ? 'rounded-r' : ''}`}>
+                        {isStart && <span className="truncate block">{ev.title}</span>}
+                        {!isStart && <span className="invisible text-[9px]">.</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -60,11 +109,13 @@ export default function HomePage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [slides, setSlides] = useState<BannerSlide[]>([]);
   const [bannerImgs, setBannerImgs] = useState<string[]>([]);
+  const [locationImg, setLocationImg] = useState('');
 
   useEffect(() => {
     getNotices().then(setNotices);
     getSiteContent().then(c => setSlides(c.bannerSlides));
     getBanners().then(setBannerImgs);
+    getLocationImage().then(setLocationImg);
     const timer = setInterval(() => setCurrentSlide((p) => (p + 1) % 3), 5000);
     return () => clearInterval(timer);
   }, []);
@@ -122,7 +173,7 @@ export default function HomePage() {
         {/* 달력 */}
         <ScrollReveal animation="fade-right" delay={0}>
           <h2 className="text-sm font-semibold text-gray-700 mb-2">달력</h2>
-          <div className="bg-white rounded p-4 shadow-sm" style={{ minHeight: '220px' }}>
+          <div className="bg-white rounded p-4 shadow-sm">
             <SimpleCalendar />
           </div>
         </ScrollReveal>
@@ -147,15 +198,21 @@ export default function HomePage() {
       <ScrollReveal animation="fade-up" delay={0} className="max-w-5xl mx-auto px-6 pb-10">
         <h2 className="text-sm font-semibold text-gray-700 mb-2">총동아리연합회실(G301-1) 오시는 길</h2>
         <div className="bg-white rounded shadow-sm overflow-hidden" style={{ height: '200px' }}>
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-            <div className="text-center">
-              <p>지도 이미지를 업로드해주세요</p>
-              <Link href="/about/location" className="text-blue-500 text-xs hover:underline mt-1 block">
-                오시는 길 자세히 보기 →
-              </Link>
-            </div>
-          </div>
+          {locationImg
+            ? <img src={locationImg} alt="오시는 길" className="w-full h-full object-contain" />
+            : <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                <div className="text-center">
+                  <p>지도 이미지를 업로드해주세요</p>
+                  <Link href="/about/location" className="text-blue-500 text-xs hover:underline mt-1 block">
+                    오시는 길 자세히 보기 →
+                  </Link>
+                </div>
+              </div>
+          }
         </div>
+        <Link href="/about/location" className="text-xs text-gray-400 hover:text-gray-600 mt-1 block text-right">
+          오시는 길 자세히 보기 →
+        </Link>
       </ScrollReveal>
     </div>
   );
