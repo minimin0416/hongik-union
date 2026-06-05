@@ -72,10 +72,13 @@ export default function Header() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [instagramUrl, setInstagramUrl] = useState('');
   const [kakaoUrl, setKakaoUrl] = useState('');
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('hn_logo') || '';
+  });
   useEffect(() => {
     getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
-    getLogo().then(v => setLogoUrl(v || ''));
+    if (!logoUrl) getLogo().then(v => setLogoUrl(v || ''));
   }, []);
 
   return (
