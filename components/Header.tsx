@@ -72,10 +72,10 @@ export default function Header() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [instagramUrl, setInstagramUrl] = useState('');
   const [kakaoUrl, setKakaoUrl] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   useEffect(() => {
     getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
-    getLogo().then(setLogoUrl);
+    getLogo().then(v => setLogoUrl(v || ''));
   }, []);
 
   return (
@@ -84,12 +84,14 @@ export default function Header() {
         <div className="flex items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 mr-8">
-            {logoUrl
-              ? <img src={logoUrl} alt="로고" style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }} />
-              : <div className="flex flex-col leading-tight">
-                  <span className="font-black text-base text-gray-900 tracking-tight">홍익대학교</span>
-                  <span className="text-xs text-gray-400 tracking-widest uppercase font-medium">HONGIK UNIVERSITY</span>
-                </div>
+            {logoUrl === null
+              ? <div style={{ width: '80px', height: '40px' }} />
+              : logoUrl
+                ? <img src={logoUrl} alt="로고" style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }} />
+                : <div className="flex flex-col leading-tight">
+                    <span className="font-black text-base text-gray-900 tracking-tight">홍익대학교</span>
+                    <span className="text-xs text-gray-400 tracking-widest uppercase font-medium">HONGIK UNIVERSITY</span>
+                  </div>
             }
           </Link>
 
