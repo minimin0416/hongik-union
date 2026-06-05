@@ -88,13 +88,12 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 mr-8">
             {logoUrl === null
-              ? <div style={{ width: '80px', height: '40px' }} />
-              : logoUrl
-                ? <img src={logoUrl} alt="로고" style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }} />
-                : <div className="flex flex-col leading-tight">
-                    <span className="font-black text-base text-gray-900 tracking-tight">홍익대학교</span>
-                    <span className="text-xs text-gray-400 tracking-widest uppercase font-medium">HONGIK UNIVERSITY</span>
-                  </div>
+              ? <div style={{ width: '120px', height: '40px' }} />
+              : <img
+                  src={logoUrl || '/logo.png'}
+                  alt="로고"
+                  style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }}
+                />
             }
           </Link>
 
