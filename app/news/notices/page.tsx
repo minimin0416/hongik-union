@@ -28,7 +28,13 @@ export default function NoticesPage() {
   const [attLoading, setAttLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
-  useEffect(() => { getNotices().then(setNotices); }, []);
+  useEffect(() => {
+    getNotices().then(ns => {
+      setNotices(ns);
+      // 공지 이미지를 백그라운드에서 미리 캐시
+      ns.forEach(n => { if (n.hasImages) getNoticeImages(n.id); });
+    });
+  }, []);
 
   useEffect(() => {
     if (!selected) { setAttachment(null); setImages([]); return; }

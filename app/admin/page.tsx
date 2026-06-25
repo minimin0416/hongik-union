@@ -611,7 +611,7 @@ function NewsTab() {
                     🖼️ 이미지 추가
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0]; if (!file) return;
-                      const url = await compressImage(file, 1200, 0.85);
+                      const url = await compressImage(file, 900, 0.78);
                       setNImages(prev => [...prev, url]);
                       e.target.value = '';
                     }} />
