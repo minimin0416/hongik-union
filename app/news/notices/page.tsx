@@ -1,18 +1,50 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getNotices, downloadFile, type Notice } from '@/lib/local-store';
+import { getNotices, getNoticeAttachment, type Notice, type Attachment } from '@/lib/local-store';
 import ScrollReveal from '@/components/ScrollReveal';
+
+function openAsBlob(att: Attachment) {
+  const parts = att.url.split(',');
+  const mime = parts[0].split(':')[1].split(';')[0];
+  const binary = atob(parts[1]);
+  const arr = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+  const blob = new Blob([arr], { type: mime });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+function downloadAtt(att: Attachment) {
+  const a = document.createElement('a');
+  a.href = att.url;
+  a.download = att.name;
+  a.click();
+}
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [selected, setSelected] = useState<Notice | null>(null);
+  const [attachment, setAttachment] = useState<Attachment | null>(null);
+  const [attLoading, setAttLoading] = useState(false);
 
   useEffect(() => { getNotices().then(setNotices); }, []);
+
+  useEffect(() => {
+    if (!selected) { setAttachment(null); return; }
+    if (!selected.attachment) { setAttachment(null); return; }
+    if (selected.attachment.stored) {
+      setAttLoading(true);
+      getNoticeAttachment(selected.id).then(att => { setAttachment(att); setAttLoading(false); });
+    } else {
+      setAttachment(selected.attachment);
+    }
+  }, [selected]);
 
   const pinned = notices.filter((n) => n.isPinned);
   const normal = notices.filter((n) => !n.isPinned);
   const ordered = [...pinned, ...normal];
+
+  const isHwp = attachment?.name.toLowerCase().endsWith('.hwp') || attachment?.name.toLowerCase().endsWith('.hwpx');
 
   return (
     <div>
@@ -41,16 +73,26 @@ export default function NoticesPage() {
           {/* 첨부파일 */}
           {selected.attachment && (
             <div className="mb-5">
-              <button
-                onClick={() => downloadFile(selected.attachment!.url, selected.attachment!.name)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm text-gray-700"
-              >
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                </svg>
-                <span className="font-medium">{selected.attachment.name}</span>
-                <span className="text-xs text-blue-500 ml-1">다운로드</span>
-              </button>
+              {attLoading ? (
+                <div className="text-xs text-gray-400">파일 불러오는 중...</div>
+              ) : attachment ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                  <span className="text-sm text-gray-700 font-medium">{attachment.name}</span>
+                  {isHwp && (
+                    <button onClick={() => openAsBlob(attachment)}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                      열기
+                    </button>
+                  )}
+                  <button onClick={() => downloadAtt(attachment)}
+                    className="px-3 py-1.5 bg-gray-800 text-white text-xs font-semibold rounded-lg hover:bg-gray-700 transition-colors">
+                    다운로드
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
 

@@ -10,7 +10,7 @@ import {
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
-  readFileAsBase64, downloadFile,
+  readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment,
   type Notice, type Minutes, type ClubNews, type Penalty,
   type FormFile, type ElectionAnnouncement, type Inquiry,
   type ClubData, type SiteContent, type Attachment,
@@ -473,10 +473,18 @@ function NewsTab() {
   const [nShow, setNShow] = useState(false);
   useEffect(() => { getNotices().then(setNotices); }, []);
   const saveN = (v: Notice[]) => { setNotices(v); saveNotices(v); };
-  const submitN = (e: React.FormEvent) => {
+  const submitN = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nEditId) saveN(notices.map((n) => n.id === nEditId ? { ...n, ...nForm } : n));
-    else saveN([{ id: Date.now().toString(), ...nForm, createdAt: new Date().toISOString().slice(0, 10) }, ...notices]);
+    const id = nEditId || Date.now().toString();
+    let att = nForm.attachment;
+    // 첨부파일 base64는 notices 배열에서 분리해 별도 키에 저장
+    if (att && att.url.startsWith('data:')) {
+      await saveNoticeAttachment(id, att);
+      att = { name: att.name, type: att.type, url: '', stored: true };
+    }
+    const noticeData = { ...nForm, attachment: att };
+    if (nEditId) saveN(notices.map((n) => n.id === nEditId ? { ...n, ...noticeData } : n));
+    else saveN([{ id, ...noticeData, createdAt: new Date().toISOString().slice(0, 10) }, ...notices]);
     setNForm({ title: '', content: '', isPinned: false, attachment: undefined, imageUrl: '' }); setNEditId(null); setNShow(false);
   };
 
@@ -603,7 +611,12 @@ function NewsTab() {
             {notices.length === 0 && <EmptyState text="공지사항이 없습니다" />}
             {[...notices.filter(n => n.isPinned), ...notices.filter(n => !n.isPinned)].map((n) => (
               <ListRow key={n.id} title={n.title} sub={n.createdAt} isPinned={n.isPinned} attachment={n.attachment}
-                onEdit={() => { setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: n.attachment, imageUrl: n.imageUrl || '' }); setNEditId(n.id); setNShow(true); }}
+                onEdit={async () => {
+                  let att = n.attachment;
+                  if (att?.stored) { const full = await getNoticeAttachment(n.id); if (full) att = full; }
+                  setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: att, imageUrl: n.imageUrl || '' });
+                  setNEditId(n.id); setNShow(true);
+                }}
                 onDelete={() => { if (confirm('삭제할까요?')) saveN(notices.filter((x) => x.id !== n.id)); }} />
             ))}
           </div>

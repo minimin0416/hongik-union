@@ -19,10 +19,15 @@ export default function RulesPage() {
 
   const isPdf = file?.type === 'application/pdf' || file?.name.toLowerCase().endsWith('.pdf');
 
-  const openInTab = () => {
+  const openAsBlob = () => {
     if (!file) return;
-    const win = window.open();
-    if (win) { win.document.write(`<iframe src="${file.url}" style="width:100%;height:100vh;border:none;"></iframe>`); }
+    const parts = file.url.split(',');
+    const mime = parts[0].split(':')[1].split(';')[0];
+    const binary = atob(parts[1]);
+    const arr = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+    const blob = new Blob([arr], { type: mime });
+    window.open(URL.createObjectURL(blob), '_blank');
   };
 
   return (
@@ -31,14 +36,9 @@ export default function RulesPage() {
       {file ? (
         <>
           {/* PDF: 데스크탑 iframe 미리보기 */}
-          {isPdf ? (
+          {isPdf && (
             <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
               <iframe src={file.url} className="w-full" style={{ height: '800px', border: 'none' }} />
-            </div>
-          ) : (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-3 text-center">
-              <p className="text-gray-500 text-sm">HWP 파일은 브라우저에서 미리보기가 지원되지 않습니다.</p>
-              <p className="text-gray-400 text-xs mt-1">다운로드 후 한글 프로그램으로 열어주세요.</p>
             </div>
           )}
           <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-5 py-3.5 flex-wrap gap-3">
@@ -49,16 +49,14 @@ export default function RulesPage() {
               <span className="text-sm text-gray-700 font-medium truncate">{file.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              {/* 모바일: 새 탭에서 열기 */}
-              {isPdf && (
-                <button onClick={openInTab}
-                  className="md:hidden flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  열기
-                </button>
-              )}
+              {/* 모바일: 파일 열기 (blob URL — 전체 페이지 표시) */}
+              <button onClick={openAsBlob}
+                className="md:hidden flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                열기
+              </button>
               <button onClick={download}
                 className="flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
