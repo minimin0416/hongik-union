@@ -153,7 +153,14 @@ export const defaultContent: SiteContent = {
 async function dbGet<T>(key: string, def: T): Promise<T> {
   if (typeof window === 'undefined') return def;
   const cached = localStorage.getItem(key);
-  if (cached) return JSON.parse(cached) as T;
+  if (cached) {
+    // 캐시 즉시 반환 + 백그라운드에서 최신 데이터로 갱신
+    fetch(`/api/data?key=${encodeURIComponent(key)}`)
+      .then(r => r.json())
+      .then(v => { if (v !== null) localStorage.setItem(key, v); })
+      .catch(() => {});
+    return JSON.parse(cached) as T;
+  }
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
