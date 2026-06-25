@@ -78,7 +78,13 @@ export default function Header() {
   });
   useEffect(() => {
     getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
-    if (!logoUrl) getLogo().then(v => setLogoUrl(v || ''));
+    getLogo().then(v => setLogoUrl(v || ''));
+    const handler = (e: Event) => {
+      const { key, value } = (e as CustomEvent).detail;
+      if (key === 'hn_logo') setLogoUrl(value || '');
+    };
+    window.addEventListener('db-str-update', handler);
+    return () => window.removeEventListener('db-str-update', handler);
   }, []);
 
   return (

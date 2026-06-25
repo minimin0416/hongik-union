@@ -202,8 +202,9 @@ async function dbGetStr(key: string): Promise<string> {
     fetch(`/api/data?key=${encodeURIComponent(key)}`)
       .then(r => r.json())
       .then(v => {
-        if (v !== null) localStorage.setItem(key, v);
-        else localStorage.removeItem(key); // 초기화 후 다른 기기 캐시도 삭제
+        if (v !== null) { localStorage.setItem(key, v); }
+        else { localStorage.removeItem(key); }
+        window.dispatchEvent(new CustomEvent('db-str-update', { detail: { key, value: v ?? '' } }));
       })
       .catch(() => {});
     return cached;
