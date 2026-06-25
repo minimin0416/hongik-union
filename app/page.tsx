@@ -16,7 +16,7 @@ function getEventsForDay(events: CalendarEvent[], date: string) {
   return events.filter(e => e.startDate <= date && e.endDate >= date);
 }
 
-// localStorage 동기 읽기 헬퍼 (SSR 안전)
+// localStorage 동기 읽기 헬퍼 (SSR + 프라이버시 차단 안전)
 function syncGet<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
   try {
@@ -26,7 +26,11 @@ function syncGet<T>(key: string, fallback: T): T {
 }
 function syncGetStr(key: string): string {
   if (typeof window === 'undefined') return '';
-  return localStorage.getItem(key) || '';
+  try { return localStorage.getItem(key) || ''; } catch { return ''; }
+}
+function syncHasCache(...keys: string[]): boolean {
+  if (typeof window === 'undefined') return false;
+  try { return keys.some(k => !!localStorage.getItem(k)); } catch { return false; }
 }
 
 function SimpleCalendar({ events }: { events: CalendarEvent[] }) {
@@ -116,11 +120,8 @@ export default function HomePage() {
   const [locationImg, setLocationImg] = useState(() => syncGetStr('hn_location_image'));
   const [calEvents, setCalEvents] = useState<CalendarEvent[]>(() => syncGet('hn_calendar_events', []));
 
-  // 캐시가 있으면 즉시 ready, 없으면 fetch 완료 후 ready
-  const [ready, setReady] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !!localStorage.getItem('hn_banners') || !!localStorage.getItem('hn_content');
-  });
+  // 캐시가 있으면 즉시 ready, 없으면 fetch 완료 후 ready (localStorage 차단 시 fetch로 폴백)
+  const [ready, setReady] = useState(() => syncHasCache('hn_banners', 'hn_content'));
 
   useEffect(() => {
     Promise.all([
@@ -145,7 +146,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="page-ready" style={{ background: '#e8e8e8', minHeight: '100vh' }}>
+    <div style={{ background: '#e8e8e8', minHeight: '100vh', animation: 'sr-fade-in 0.4s ease both' }}>
 
       {/* Hero 배너 슬라이더 */}
       <div className="relative w-full overflow-hidden" style={{ height: '320px' }}>

@@ -74,7 +74,7 @@ export default function Header() {
   const [kakaoUrl, setKakaoUrl] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('hn_logo') || '';
+    try { return localStorage.getItem('hn_logo') || ''; } catch { return ''; }
   });
   useEffect(() => {
     getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
@@ -91,15 +91,15 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center h-16">
-          {/* Logo */}
+          {/* Logo: null=SSR(빈박스), ''=기본로고없음(빈박스), 값있으면 표시 */}
           <Link href="/" className="flex-shrink-0 mr-8">
-            {logoUrl === null
-              ? <div style={{ width: '120px', height: '40px' }} />
-              : <img
-                  src={logoUrl || '/logo.png'}
+            {logoUrl
+              ? <img
+                  src={logoUrl}
                   alt="로고"
                   style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }}
                 />
+              : <div style={{ width: '120px', height: '40px' }} />
             }
           </Link>
 
