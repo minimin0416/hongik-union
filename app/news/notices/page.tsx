@@ -57,6 +57,13 @@ export default function NoticesPage() {
           <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm border-t border-gray-100 pt-5">
             {selected.content || '내용이 없습니다.'}
           </div>
+
+          {/* 포스터 이미지 */}
+          {selected.imageUrl && (
+            <div className="mt-6 border-t border-gray-100 pt-6">
+              <img src={selected.imageUrl} alt="포스터" className="w-full rounded-xl border border-gray-200 object-contain" />
+            </div>
+          )}
         </div>
       ) : (
         <ScrollReveal animation="fade-up" delay={80}>

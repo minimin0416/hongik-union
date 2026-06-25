@@ -468,7 +468,7 @@ function NewsTab() {
 
   // 공지사항
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [nForm, setNForm] = useState({ title: '', content: '', isPinned: false, attachment: undefined as Attachment | undefined });
+  const [nForm, setNForm] = useState({ title: '', content: '', isPinned: false, attachment: undefined as Attachment | undefined, imageUrl: '' });
   const [nEditId, setNEditId] = useState<string | null>(null);
   const [nShow, setNShow] = useState(false);
   useEffect(() => { getNotices().then(setNotices); }, []);
@@ -477,7 +477,7 @@ function NewsTab() {
     e.preventDefault();
     if (nEditId) saveN(notices.map((n) => n.id === nEditId ? { ...n, ...nForm } : n));
     else saveN([{ id: Date.now().toString(), ...nForm, createdAt: new Date().toISOString().slice(0, 10) }, ...notices]);
-    setNForm({ title: '', content: '', isPinned: false, attachment: undefined }); setNEditId(null); setNShow(false);
+    setNForm({ title: '', content: '', isPinned: false, attachment: undefined, imageUrl: '' }); setNEditId(null); setNShow(false);
   };
 
   // 회의록
@@ -588,6 +588,9 @@ function NewsTab() {
               <h3 className="font-semibold text-gray-700">{nEditId ? '공지 수정' : '새 공지 작성'}</h3>
               <Field label="제목" required><input required value={nForm.title} onChange={(e) => setNForm({ ...nForm, title: e.target.value })} className={inputCls} placeholder="공지사항 제목" /></Field>
               <Field label="내용"><textarea value={nForm.content} onChange={(e) => setNForm({ ...nForm, content: e.target.value })} rows={5} className={inputCls + ' resize-none'} /></Field>
+              <Field label="포스터 이미지 (선택)">
+                <ImageInput current={nForm.imageUrl} onUpload={(url) => setNForm({ ...nForm, imageUrl: url })} onRemove={() => setNForm({ ...nForm, imageUrl: '' })} />
+              </Field>
               <FileInput current={nForm.attachment} onUpload={(a) => setNForm({ ...nForm, attachment: a })} />
               <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
                 <input type="checkbox" checked={nForm.isPinned} onChange={(e) => setNForm({ ...nForm, isPinned: e.target.checked })} className="w-4 h-4" />
@@ -600,7 +603,7 @@ function NewsTab() {
             {notices.length === 0 && <EmptyState text="공지사항이 없습니다" />}
             {[...notices.filter(n => n.isPinned), ...notices.filter(n => !n.isPinned)].map((n) => (
               <ListRow key={n.id} title={n.title} sub={n.createdAt} isPinned={n.isPinned} attachment={n.attachment}
-                onEdit={() => { setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: n.attachment }); setNEditId(n.id); setNShow(true); }}
+                onEdit={() => { setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: n.attachment, imageUrl: n.imageUrl || '' }); setNEditId(n.id); setNShow(true); }}
                 onDelete={() => { if (confirm('삭제할까요?')) saveN(notices.filter((x) => x.id !== n.id)); }} />
             ))}
           </div>
@@ -1259,14 +1262,6 @@ export default function AdminPage() {
     setTimeout(() => setSyncDone(false), 3000);
   };
 
-  const resetAll = async () => {
-    if (!confirm('모든 데이터를 초기화하시겠습니까?\n(공지, 이미지, 동아리 정보 등 전부 삭제됩니다)')) return;
-    Object.keys(localStorage).filter(k => k.startsWith('hn_')).forEach(k => localStorage.removeItem(k));
-    await fetch('/api/data', { method: 'DELETE' });
-    alert('초기화 완료. 페이지를 새로고침합니다.');
-    window.location.reload();
-  };
-
   const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
 
   const resetTimer = () => {
@@ -1336,10 +1331,6 @@ export default function AdminPage() {
           <button onClick={syncAll} disabled={syncing}
             className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium transition-colors">
             {syncing ? '동기화 중...' : syncDone ? '✓ 완료' : '☁️ 전체 동기화'}
-          </button>
-          <button onClick={resetAll}
-            className="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors">
-            🗑️ 전체 초기화
           </button>
           <button onClick={logout} className="text-gray-400 hover:text-white text-sm transition-colors">로그아웃</button>
         </div>
