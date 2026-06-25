@@ -28,3 +28,8 @@ export async function POST(req: NextRequest) {
   const data = await redisCommand(['SET', body.key, body.value]);
   return NextResponse.json({ ok: data.result === 'OK' });
 }
+
+export async function DELETE() {
+  const data = await redisCommand(['FLUSHDB']);
+  return NextResponse.json({ ok: data.result === 'OK' });
+}

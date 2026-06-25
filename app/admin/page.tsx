@@ -1259,6 +1259,14 @@ export default function AdminPage() {
     setTimeout(() => setSyncDone(false), 3000);
   };
 
+  const resetAll = async () => {
+    if (!confirm('모든 데이터를 초기화하시겠습니까?\n(공지, 이미지, 동아리 정보 등 전부 삭제됩니다)')) return;
+    Object.keys(localStorage).filter(k => k.startsWith('hn_')).forEach(k => localStorage.removeItem(k));
+    await fetch('/api/data', { method: 'DELETE' });
+    alert('초기화 완료. 페이지를 새로고침합니다.');
+    window.location.reload();
+  };
+
   const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
 
   const resetTimer = () => {
@@ -1328,6 +1336,10 @@ export default function AdminPage() {
           <button onClick={syncAll} disabled={syncing}
             className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium transition-colors">
             {syncing ? '동기화 중...' : syncDone ? '✓ 완료' : '☁️ 전체 동기화'}
+          </button>
+          <button onClick={resetAll}
+            className="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition-colors">
+            🗑️ 전체 초기화
           </button>
           <button onClick={logout} className="text-gray-400 hover:text-white text-sm transition-colors">로그아웃</button>
         </div>
