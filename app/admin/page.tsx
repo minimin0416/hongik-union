@@ -1232,6 +1232,8 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('about');
   const [syncError, setSyncError] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncDone, setSyncDone] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -1239,6 +1241,23 @@ export default function AdminPage() {
     window.addEventListener('db-sync-error', handler);
     return () => window.removeEventListener('db-sync-error', handler);
   }, []);
+
+  const syncAll = async () => {
+    setSyncing(true);
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('hn_'));
+    await Promise.all(keys.map(async (key) => {
+      const value = localStorage.getItem(key);
+      if (!value) return;
+      await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      });
+    }));
+    setSyncing(false);
+    setSyncDone(true);
+    setTimeout(() => setSyncDone(false), 3000);
+  };
 
   const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
 
@@ -1305,7 +1324,13 @@ export default function AdminPage() {
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center"><span className="text-gray-800 font-black text-sm">홍</span></div>
           <div className="text-white"><div className="font-bold text-sm">관리자 페이지</div><div className="text-gray-400 text-xs">총동아리연합회</div></div>
         </div>
-        <button onClick={logout} className="text-gray-400 hover:text-white text-sm transition-colors">로그아웃</button>
+        <div className="flex items-center gap-3">
+          <button onClick={syncAll} disabled={syncing}
+            className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium transition-colors">
+            {syncing ? '동기화 중...' : syncDone ? '✓ 완료' : '☁️ 전체 동기화'}
+          </button>
+          <button onClick={logout} className="text-gray-400 hover:text-white text-sm transition-colors">로그아웃</button>
+        </div>
       </div>
 
       <div className="bg-white border-b border-gray-200 overflow-x-auto">
