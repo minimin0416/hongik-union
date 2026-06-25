@@ -157,7 +157,10 @@ async function dbGet<T>(key: string, def: T): Promise<T> {
     // 캐시 즉시 반환 + 백그라운드에서 최신 데이터로 갱신
     fetch(`/api/data?key=${encodeURIComponent(key)}`)
       .then(r => r.json())
-      .then(v => { if (v !== null) localStorage.setItem(key, v); })
+      .then(v => {
+        if (v !== null) localStorage.setItem(key, v);
+        else localStorage.removeItem(key); // 초기화 후 다른 기기 캐시도 삭제
+      })
       .catch(() => {});
     return JSON.parse(cached) as T;
   }
@@ -194,7 +197,17 @@ async function dbSet(key: string, value: unknown): Promise<void> {
 async function dbGetStr(key: string): Promise<string> {
   if (typeof window === 'undefined') return '';
   const cached = localStorage.getItem(key);
-  if (cached) return cached;
+  if (cached) {
+    // 백그라운드에서 최신 데이터로 갱신
+    fetch(`/api/data?key=${encodeURIComponent(key)}`)
+      .then(r => r.json())
+      .then(v => {
+        if (v !== null) localStorage.setItem(key, v);
+        else localStorage.removeItem(key); // 초기화 후 다른 기기 캐시도 삭제
+      })
+      .catch(() => {});
+    return cached;
+  }
   try {
     const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
     const value = await res.json();
