@@ -1231,7 +1231,14 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('about');
+  const [syncError, setSyncError] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handler = () => setSyncError(true);
+    window.addEventListener('db-sync-error', handler);
+    return () => window.removeEventListener('db-sync-error', handler);
+  }, []);
 
   const logout = () => { setLoggedIn(false); localStorage.removeItem('admin_session'); setPassword(''); };
 
@@ -1313,6 +1320,16 @@ export default function AdminPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {syncError && (
+          <div className="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <span className="text-red-500 text-lg flex-shrink-0">⚠️</span>
+            <div>
+              <p className="text-red-700 font-semibold text-sm">클라우드 저장 실패 — 다른 기기에서 변경사항이 보이지 않습니다</p>
+              <p className="text-red-500 text-xs mt-1">Vercel 환경변수(<code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>SUPABASE_SECRET_KEY</code>)를 확인해주세요. 브라우저 콘솔(F12)에서 자세한 오류를 확인할 수 있습니다.</p>
+              <button onClick={() => setSyncError(false)} className="text-red-400 text-xs hover:underline mt-1">닫기</button>
+            </div>
+          </div>
+        )}
         {tab === 'about'    && <AboutTab />}
         {tab === 'clubs'    && <ClubsTab />}
         {tab === 'news'     && <NewsTab />}

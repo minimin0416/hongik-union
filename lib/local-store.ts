@@ -162,17 +162,26 @@ async function dbGet<T>(key: string, def: T): Promise<T> {
   } catch { return def; }
 }
 
+function emitSyncError(key: string, detail?: string) {
+  if (typeof window === 'undefined') return;
+  console.error('[DB] Supabase 저장 실패:', key, detail);
+  window.dispatchEvent(new CustomEvent('db-sync-error', { detail: { key, detail } }));
+}
+
 async function dbSet(key: string, value: unknown): Promise<void> {
   if (typeof window === 'undefined') return;
   const serialized = JSON.stringify(value);
-  localStorage.setItem(key, serialized); // 즉시 캐시 업데이트
+  localStorage.setItem(key, serialized);
   try {
-    await fetch('/api/data', {
+    const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value: serialized }),
     });
-  } catch {}
+    if (!res.ok) emitSyncError(key, `HTTP ${res.status}`);
+  } catch (e) {
+    emitSyncError(key, String(e));
+  }
 }
 
 async function dbGetStr(key: string): Promise<string> {
@@ -189,14 +198,17 @@ async function dbGetStr(key: string): Promise<string> {
 
 async function dbSetStr(key: string, value: string): Promise<void> {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(key, value); // 즉시 캐시 업데이트
+  localStorage.setItem(key, value);
   try {
-    await fetch('/api/data', {
+    const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value }),
     });
-  } catch {}
+    if (!res.ok) emitSyncError(key, `HTTP ${res.status}`);
+  } catch (e) {
+    emitSyncError(key, String(e));
+  }
 }
 
 /* ── getter / setter ── */
