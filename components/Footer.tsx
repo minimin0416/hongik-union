@@ -7,7 +7,7 @@ export default function Footer() {
   const [title, setTitle] = useState('홍익대학교 총동아리연합회');
   const [address, setAddress] = useState('G동 301-1호');
   const [email, setEmail] = useState('union@hongik.ac.kr');
-  const [copyright, setCopyright] = useState('© 2025 홍익대학교 총동아리연합회. All rights reserved.');
+  const [copyright, setCopyright] = useState('© 2026 홍익대학교 총동아리연합회 Union. All rights reserved.');
 
   useEffect(() => {
     getSiteContent().then(c => {
