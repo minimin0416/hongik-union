@@ -1228,9 +1228,6 @@ function SettingsTab() {
         <Field label="단체명">
           <input value={content.footerTitle ?? ''} onChange={(e) => setContent({ ...content, footerTitle: e.target.value })} className={inputCls} placeholder="홍익대학교 총동아리연합회" />
         </Field>
-        <Field label="저작권 문구">
-          <input value={content.footerCopyright ?? ''} onChange={(e) => setContent({ ...content, footerCopyright: e.target.value })} className={inputCls} placeholder="© 2025 홍익대학교 총동아리연합회..." />
-        </Field>
         <p className="text-xs text-gray-400">위치·이메일은 총동아리연합회 → 오시는 길에서 수정하세요</p>
       </div>
 
