@@ -94,7 +94,7 @@ const defaultElectionAnnouncements: ElectionAnnouncement[] = [
   { id: '1', title: '[공고] 제40대 총동아리연합회 임원 선거 일정 공고', content: '', date: '2025-11-01', status: '예정' },
   { id: '2', title: '[공고] 제39대 총동아리연합회 임원 선거 당선자 발표', content: '', date: '2024-11-20', status: '완료' },
 ];
-export const defaultContent: SiteContent = {
+export const defaultContent: SiteContent = { // exported for sync init
   bannerSlides: [
     { title: '홍익대학교 총동아리연합회', subtitle: '우리 모두가 함께 만들어가는 동아리 문화' },
     { title: '2025년 동아리 활동', subtitle: '다양한 분야에서 꿈을 펼치세요' },
