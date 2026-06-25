@@ -43,7 +43,7 @@ export const downloadFile = (url: string, name: string) => {
 
 /* ── 타입 정의 ── */
 export type Attachment = { url: string; name: string; type: string; stored?: boolean };
-export type Notice = { id: string; title: string; content: string; isPinned: boolean; createdAt: string; attachment?: Attachment; imageUrl?: string };
+export type Notice = { id: string; title: string; content: string; isPinned: boolean; createdAt: string; attachment?: Attachment; imageUrl?: string; hasImages?: boolean };
 export type ClubData = { id: number; name: string; category: string; room: string; president: string; contact: string; recruitPeriod: string; meetingSchedule: string; intro: string; desc: string; activities: string[]; targets: string[]; instagram: string; imageUrl?: string };
 export type Minutes = { id: string; title: string; date: string; attendees: string; attachment?: Attachment };
 export type ClubNews = { id: string; club: string; category: string; title: string; content: string; date: string; imageUrl?: string };
@@ -266,12 +266,20 @@ export const saveClubMapImage   = (v: string)                   => dbSetStr('hn_
 export const getCalendarEvents  = (): Promise<CalendarEvent[]>  => dbGet('hn_calendar_events', []);
 export const saveCalendarEvents = (v: CalendarEvent[])          => dbSet('hn_calendar_events', v);
 
-// 공지사항 첨부파일 별도 저장 (대용량 base64가 notices 배열 비대화 방지)
+// 공지사항 첨부파일 별도 저장
 export const saveNoticeAttachment = (id: string, att: Attachment): Promise<void> =>
   dbSetStr(`hn_att_${id}`, JSON.stringify({ name: att.name, type: att.type, url: att.url }));
 export const getNoticeAttachment = async (id: string): Promise<Attachment | null> => {
   const v = await dbGetStr(`hn_att_${id}`);
   return v ? JSON.parse(v) as Attachment : null;
+};
+
+// 공지사항 이미지 목록 별도 저장
+export const saveNoticeImages = (id: string, images: string[]): Promise<void> =>
+  dbSetStr(`hn_imgs_${id}`, JSON.stringify(images));
+export const getNoticeImages = async (id: string): Promise<string[]> => {
+  const v = await dbGetStr(`hn_imgs_${id}`);
+  return v ? JSON.parse(v) as string[] : [];
 };
 
 export const getClubs = async (): Promise<ClubData[]> => {

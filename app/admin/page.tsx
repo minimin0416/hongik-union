@@ -10,7 +10,7 @@ import {
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
   getSiteContent, saveSiteContent,
-  readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment,
+  readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment, saveNoticeImages, getNoticeImages,
   type Notice, type Minutes, type ClubNews, type Penalty,
   type FormFile, type ElectionAnnouncement, type Inquiry,
   type ClubData, type SiteContent, type Attachment,
@@ -468,7 +468,8 @@ function NewsTab() {
 
   // 공지사항
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [nForm, setNForm] = useState({ title: '', content: '', isPinned: false, attachment: undefined as Attachment | undefined, imageUrl: '' });
+  const [nForm, setNForm] = useState({ title: '', content: '', isPinned: false, attachment: undefined as Attachment | undefined });
+  const [nImages, setNImages] = useState<string[]>([]);
   const [nEditId, setNEditId] = useState<string | null>(null);
   const [nShow, setNShow] = useState(false);
   useEffect(() => { getNotices().then(setNotices); }, []);
@@ -477,15 +478,16 @@ function NewsTab() {
     e.preventDefault();
     const id = nEditId || Date.now().toString();
     let att = nForm.attachment;
-    // 첨부파일 base64는 notices 배열에서 분리해 별도 키에 저장
     if (att && att.url.startsWith('data:')) {
       await saveNoticeAttachment(id, att);
       att = { name: att.name, type: att.type, url: '', stored: true };
     }
-    const noticeData = { ...nForm, attachment: att };
+    if (nImages.length > 0) await saveNoticeImages(id, nImages);
+    const noticeData = { ...nForm, attachment: att, hasImages: nImages.length > 0 };
     if (nEditId) saveN(notices.map((n) => n.id === nEditId ? { ...n, ...noticeData } : n));
     else saveN([{ id, ...noticeData, createdAt: new Date().toISOString().slice(0, 10) }, ...notices]);
-    setNForm({ title: '', content: '', isPinned: false, attachment: undefined, imageUrl: '' }); setNEditId(null); setNShow(false);
+    setNForm({ title: '', content: '', isPinned: false, attachment: undefined });
+    setNImages([]); setNEditId(null); setNShow(false);
   };
 
   // 회의록
@@ -596,8 +598,25 @@ function NewsTab() {
               <h3 className="font-semibold text-gray-700">{nEditId ? '공지 수정' : '새 공지 작성'}</h3>
               <Field label="제목" required><input required value={nForm.title} onChange={(e) => setNForm({ ...nForm, title: e.target.value })} className={inputCls} placeholder="공지사항 제목" /></Field>
               <Field label="내용"><textarea value={nForm.content} onChange={(e) => setNForm({ ...nForm, content: e.target.value })} rows={5} className={inputCls + ' resize-none'} /></Field>
-              <Field label="포스터 이미지 (선택)">
-                <ImageInput current={nForm.imageUrl} onUpload={(url) => setNForm({ ...nForm, imageUrl: url })} onRemove={() => setNForm({ ...nForm, imageUrl: '' })} />
+              <Field label="이미지 (여러 장 추가 가능)">
+                <div className="space-y-2">
+                  {nImages.map((img, i) => (
+                    <div key={i} className="relative inline-block w-full">
+                      <img src={img} alt={`이미지 ${i+1}`} className="w-full rounded-lg border border-gray-200 object-contain max-h-60" />
+                      <button type="button" onClick={() => setNImages(nImages.filter((_, j) => j !== i))}
+                        className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none hover:bg-red-600">×</button>
+                    </div>
+                  ))}
+                  <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 hover:bg-gray-50 w-fit">
+                    🖼️ 이미지 추가
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0]; if (!file) return;
+                      const url = await compressImage(file, 1200, 0.85);
+                      setNImages(prev => [...prev, url]);
+                      e.target.value = '';
+                    }} />
+                  </label>
+                </div>
               </Field>
               <FileInput current={nForm.attachment} onUpload={(a) => setNForm({ ...nForm, attachment: a })} />
               <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
@@ -614,8 +633,9 @@ function NewsTab() {
                 onEdit={async () => {
                   let att = n.attachment;
                   if (att?.stored) { const full = await getNoticeAttachment(n.id); if (full) att = full; }
-                  setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: att, imageUrl: n.imageUrl || '' });
-                  setNEditId(n.id); setNShow(true);
+                  const imgs = n.hasImages ? await getNoticeImages(n.id) : (n.imageUrl ? [n.imageUrl] : []);
+                  setNForm({ title: n.title, content: n.content, isPinned: n.isPinned, attachment: att });
+                  setNImages(imgs); setNEditId(n.id); setNShow(true);
                 }}
                 onDelete={() => { if (confirm('삭제할까요?')) saveN(notices.filter((x) => x.id !== n.id)); }} />
             ))}

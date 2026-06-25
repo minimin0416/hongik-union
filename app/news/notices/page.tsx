@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getNotices, getNoticeAttachment, type Notice, type Attachment } from '@/lib/local-store';
+import { getNotices, getNoticeAttachment, getNoticeImages, type Notice, type Attachment } from '@/lib/local-store';
 import ScrollReveal from '@/components/ScrollReveal';
 
 function openAsBlob(att: Attachment) {
@@ -26,17 +26,32 @@ export default function NoticesPage() {
   const [selected, setSelected] = useState<Notice | null>(null);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attLoading, setAttLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => { getNotices().then(setNotices); }, []);
 
   useEffect(() => {
-    if (!selected) { setAttachment(null); return; }
-    if (!selected.attachment) { setAttachment(null); return; }
-    if (selected.attachment.stored) {
-      setAttLoading(true);
-      getNoticeAttachment(selected.id).then(att => { setAttachment(att); setAttLoading(false); });
+    if (!selected) { setAttachment(null); setImages([]); return; }
+
+    // 첨부파일
+    if (selected.attachment) {
+      if (selected.attachment.stored) {
+        setAttLoading(true);
+        getNoticeAttachment(selected.id).then(att => { setAttachment(att); setAttLoading(false); });
+      } else {
+        setAttachment(selected.attachment);
+      }
     } else {
-      setAttachment(selected.attachment);
+      setAttachment(null);
+    }
+
+    // 이미지
+    if (selected.hasImages) {
+      getNoticeImages(selected.id).then(setImages);
+    } else if (selected.imageUrl) {
+      setImages([selected.imageUrl]);
+    } else {
+      setImages([]);
     }
   }, [selected]);
 
@@ -96,14 +111,17 @@ export default function NoticesPage() {
             </div>
           )}
 
+          {/* 본문 */}
           <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm border-t border-gray-100 pt-5">
             {selected.content || '내용이 없습니다.'}
           </div>
 
-          {/* 포스터 이미지 */}
-          {selected.imageUrl && (
-            <div className="mt-6 border-t border-gray-100 pt-6">
-              <img src={selected.imageUrl} alt="포스터" className="w-full rounded-xl border border-gray-200 object-contain" />
+          {/* 이미지 목록 */}
+          {images.length > 0 && (
+            <div className="mt-6 space-y-4 border-t border-gray-100 pt-6">
+              {images.map((src, i) => (
+                <img key={i} src={src} alt={`이미지 ${i + 1}`} className="w-full rounded-xl border border-gray-100 object-contain" />
+              ))}
             </div>
           )}
         </div>
@@ -132,6 +150,7 @@ export default function NoticesPage() {
                       {n.isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">고정</span>}
                       <span className="font-medium text-gray-800 text-sm">{n.title}</span>
                       {n.attachment && <span className="text-xs text-blue-400">📎</span>}
+                      {(n.hasImages || n.imageUrl) && <span className="text-xs text-gray-400">🖼️</span>}
                     </div>
                   </td>
                   <td className="text-center text-gray-400 text-xs hidden md:table-cell">{n.createdAt}</td>
