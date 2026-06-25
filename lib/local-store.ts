@@ -61,7 +61,7 @@ export type CalendarEvent = { id: string; title: string; startDate: string; endD
 export type SiteContent = {
   bannerSlides: BannerSlide[]; aboutIntro: string; aboutVision: string; workItems: WorkItem[];
   locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
-  rules: string; faqs: FaqItem[]; electionIntro: string; electionValues: ElectionValue[];
+  rules: string; rulesFile?: Attachment; faqs: FaqItem[]; electionIntro: string; electionValues: ElectionValue[];
   instagramUrl: string; kakaoUrl: string;
   clubBuildings: ClubBuilding[];
   infoRules: InfoRule[];

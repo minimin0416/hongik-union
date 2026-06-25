@@ -282,11 +282,19 @@ function AboutTab() {
       )}
 
       {sub === 'rules' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <Field label="회칙 내용">
-            <textarea value={content.rules} rows={15} onChange={(e) => setContent({ ...content, rules: e.target.value })}
-              className={inputCls + ' resize-none font-mono text-xs'} placeholder="회칙 내용을 입력하세요" />
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+          <h3 className="font-semibold text-gray-700">회칙 파일</h3>
+          <p className="text-xs text-gray-400">PDF 또는 HWP 파일을 업로드하면 회칙 페이지에서 다운로드 버튼이 표시됩니다.</p>
+          <Field label="파일 업로드 (PDF / HWP)">
+            <FileInput
+              current={content.rulesFile}
+              onUpload={(a) => setContent({ ...content, rulesFile: a })}
+            />
           </Field>
+          {content.rulesFile && (
+            <button type="button" onClick={() => setContent({ ...content, rulesFile: undefined })}
+              className="text-xs text-red-400 hover:underline">파일 삭제</button>
+          )}
         </div>
       )}
 
