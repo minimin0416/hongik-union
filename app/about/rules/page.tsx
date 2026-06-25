@@ -30,10 +30,15 @@ export default function RulesPage() {
       <h2 className="text-2xl font-bold text-gray-800 mb-6">회칙</h2>
       {file ? (
         <>
-          {/* 데스크탑: iframe 미리보기 */}
-          {isPdf && (
+          {/* PDF: 데스크탑 iframe 미리보기 */}
+          {isPdf ? (
             <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
               <iframe src={file.url} className="w-full" style={{ height: '800px', border: 'none' }} />
+            </div>
+          ) : (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-3 text-center">
+              <p className="text-gray-500 text-sm">HWP 파일은 브라우저에서 미리보기가 지원되지 않습니다.</p>
+              <p className="text-gray-400 text-xs mt-1">다운로드 후 한글 프로그램으로 열어주세요.</p>
             </div>
           )}
           <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-5 py-3.5 flex-wrap gap-3">
