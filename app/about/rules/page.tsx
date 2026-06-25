@@ -17,30 +17,39 @@ export default function RulesPage() {
     a.click();
   };
 
+  const isPdf = file?.type === 'application/pdf' || file?.name.toLowerCase().endsWith('.pdf');
+
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">회칙</h2>
-      <div className="bg-white border border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center gap-4 min-h-48">
-        {file ? (
-          <>
-            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center">
-              <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {file ? (
+        <>
+          {isPdf && (
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+              <iframe src={file.url} className="w-full" style={{ height: '800px', border: 'none' }} />
+            </div>
+          )}
+          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-5 py-3.5">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
+              <span className="text-sm text-gray-700 font-medium">{file.name}</span>
             </div>
-            <p className="text-gray-700 font-medium text-sm">{file.name}</p>
             <button onClick={download}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
+              className="flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               다운로드
             </button>
-          </>
-        ) : (
+          </div>
+        </>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl p-12 flex items-center justify-center">
           <p className="text-gray-400 text-sm">등록된 회칙 파일이 없습니다.</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
