@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation';
 
 const links = [
   { title: '공지사항', href: '/news/notices' },
+  { title: '동아리 소식', href: '/news/clubs' },
   { title: '일정', href: '/news/calendar' },
   { title: '회의록', href: '/news/minutes' },
-  { title: '동아리 소식', href: '/news/clubs' },
 ];
 
 export default function NewsLayout({ children }: { children: React.ReactNode }) {
