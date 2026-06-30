@@ -1,5 +1,0 @@
-target/
-.env
-*.class
-.idea/
-*.iml
