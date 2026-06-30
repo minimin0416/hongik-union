@@ -1,58 +1,53 @@
 'use client';
-import { useState } from 'react';
+
+import { useEffect, useState } from 'react';
+import { getClubCertFile, downloadFile, type Attachment } from '@/lib/local-store';
 
 export default function ClubCertPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ clubName: '', presidentName: '', studentId: '', purpose: '' });
+  const [file, setFile] = useState<Attachment | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  if (submitted) {
-    return (
-      <div className="max-w-lg mx-auto text-center py-12">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">신청이 완료되었습니다</h3>
-        <p className="text-gray-500 text-sm mb-6">확인 후 발급까지 1~2 영업일이 소요됩니다.</p>
-        <button onClick={() => { setSubmitted(false); setForm({ clubName:'',presidentName:'',studentId:'',purpose:'' }); }}
-          className="btn-secondary">다시 신청하기</button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    getClubCertFile().then(f => { setFile(f); setLoading(false); });
+  }, []);
 
   return (
     <div className="max-w-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">동아리증명서 발급 신청</h2>
-      <p className="text-gray-500 text-sm mb-6">동아리가 등록된 단체임을 증명하는 서류입니다.</p>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {[
-          { label: '동아리명', name: 'clubName', placeholder: '예: 홍익밴드', required: true },
-          { label: '동아리 회장 이름', name: 'presidentName', placeholder: '이름을 입력하세요', required: true },
-          { label: '회장 학번', name: 'studentId', placeholder: '예: 2021XXXX', required: true },
-          { label: '발급 목적', name: 'purpose', placeholder: '예: 외부 공연 신청용', required: false },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
-            </label>
-            <input
-              type="text"
-              value={form[field.name as keyof typeof form]}
-              onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
-              placeholder={field.placeholder}
-              required={field.required}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003087] focus:ring-2 focus:ring-blue-100"
-            />
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">동아리증명서</h2>
+      <p className="text-gray-500 text-sm mb-8">
+        아래 양식 파일을 다운로드 후 작성하여 총동아리연합회실(G301-1)에 제출하거나 카카오톡으로 전달해주세요.
+      </p>
+
+      {loading ? (
+        <div className="h-24 flex items-center justify-center text-gray-400 text-sm">불러오는 중...</div>
+      ) : file ? (
+        <div className="border border-gray-200 rounded-xl p-5 bg-white flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-gray-700 truncate">{file.name}</span>
           </div>
-        ))}
-        <button type="submit" className="btn-primary w-full justify-center">발급 신청하기</button>
-      </form>
+          <button
+            onClick={() => downloadFile(file.url, file.name)}
+            className="btn-primary flex-shrink-0"
+          >
+            다운로드
+          </button>
+        </div>
+      ) : (
+        <div className="border border-dashed border-gray-300 rounded-xl p-8 text-center text-gray-400 text-sm">
+          등록된 양식 파일이 없습니다.
+        </div>
+      )}
+
+      <div className="mt-6 p-4 bg-gray-50 rounded-xl text-sm text-gray-600 space-y-1">
+        <p className="font-semibold text-gray-700 mb-2">제출 방법</p>
+        <p>• 파일 작성 후 총동아리연합회실 G301-1 직접 제출</p>
+        <p>• 또는 카카오톡 플러스친구로 파일 전달</p>
+      </div>
     </div>
   );
 }

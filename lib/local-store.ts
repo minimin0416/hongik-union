@@ -268,6 +268,12 @@ export const saveClubMapImage   = (v: string)                   => dbSetStr('hn_
 export const getCalendarEvents  = (): Promise<CalendarEvent[]>  => dbGet('hn_calendar_events', []);
 export const saveCalendarEvents = (v: CalendarEvent[])          => dbSet('hn_calendar_events', v);
 
+// 증명서 양식 파일
+export const getActivityCertFile  = async (): Promise<Attachment | null> => { const v = await dbGetStr('hn_activity_cert'); return v ? JSON.parse(v) as Attachment : null; };
+export const saveActivityCertFile = (att: Attachment): Promise<void>     => dbSetStr('hn_activity_cert', JSON.stringify(att));
+export const getClubCertFile      = async (): Promise<Attachment | null> => { const v = await dbGetStr('hn_club_cert'); return v ? JSON.parse(v) as Attachment : null; };
+export const saveClubCertFile     = (att: Attachment): Promise<void>     => dbSetStr('hn_club_cert', JSON.stringify(att));
+
 // 공지사항 첨부파일 별도 저장
 export const saveNoticeAttachment = (id: string, att: Attachment): Promise<void> =>
   dbSetStr(`hn_att_${id}`, JSON.stringify({ name: att.name, type: att.type, url: att.url }));

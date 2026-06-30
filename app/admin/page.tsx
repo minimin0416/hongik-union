@@ -9,6 +9,7 @@ import {
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
+  getActivityCertFile, saveActivityCertFile, getClubCertFile, saveClubCertFile,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment, saveNoticeImages, getNoticeImages,
   type Notice, type Minutes, type ClubNews, type Penalty,
@@ -710,7 +711,7 @@ function NewsTab() {
 
 /* ══════════ 탭: 정보마당 ══════════ */
 function InfoTab() {
-  type Sub = 'rules' | 'forms' | 'penalty';
+  type Sub = 'rules' | 'forms' | 'penalty' | 'cert';
   const [sub, setSub] = useState<Sub>('rules');
   const [content, setContent] = useState<SiteContent | null>(null);
   const [ruleSaved, setRuleSaved] = useState(false);
@@ -743,12 +744,22 @@ function InfoTab() {
     setPForm({ club: '', reason: '', points: 1, date: new Date().toISOString().slice(0, 10) }); setPEditId(null); setPShow(false);
   };
 
+  const [actCert, setActCert] = useState<Attachment | null>(null);
+  const [clubCert, setClubCert] = useState<Attachment | null>(null);
+  useEffect(() => { getActivityCertFile().then(setActCert); getClubCertFile().then(setClubCert); }, []);
+  const uploadCert = async (file: File, type: 'activity' | 'club') => {
+    const url = await readFileAsBase64(file);
+    const att: Attachment = { name: file.name, type: file.type, url };
+    if (type === 'activity') { await saveActivityCertFile(att); setActCert(att); }
+    else { await saveClubCertFile(att); setClubCert(att); }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-800">정보마당 관리</h2>
       </div>
-      <SubNav<Sub> options={[['rules','규칙'], ['forms','양식 파일'], ['penalty','벌점 현황']]} value={sub} onChange={setSub} />
+      <SubNav<Sub> options={[['rules','규칙'], ['forms','양식 파일'], ['penalty','벌점 현황'], ['cert','증명서 양식']]} value={sub} onChange={setSub} />
 
       {sub === 'rules' && content && (
         <div>
@@ -820,6 +831,37 @@ function InfoTab() {
             ))}
           </div>
         </>
+      )}
+
+      {sub === 'cert' && (
+        <div className="space-y-6">
+          {([
+            { label: '활동증명서', file: actCert, type: 'activity' as const },
+            { label: '동아리증명서', file: clubCert, type: 'club' as const },
+          ]).map(({ label, file, type }) => (
+            <div key={type} className="bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="font-semibold text-gray-700 mb-3">{label} 양식 파일</h3>
+              {file ? (
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-3">
+                  <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
+                  <span className="text-xs text-green-600 font-medium">등록됨</span>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 mb-3">등록된 파일이 없습니다.</p>
+              )}
+              <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                {file ? '파일 교체' : '파일 업로드'}
+                <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCert(f, type); e.target.value = ''; }} />
+              </label>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
