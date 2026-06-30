@@ -1,22 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getActivityCertFile, downloadFile, type Attachment } from '@/lib/local-store';
+import { getActivityCertFile, getSiteContent, downloadFile, type Attachment } from '@/lib/local-store';
 
 export default function ActivityCertPage() {
   const [file, setFile] = useState<Attachment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [desc, setDesc] = useState('');
+  const [submitTitle, setSubmitTitle] = useState('제출 방법');
+  const [submitMethods, setSubmitMethods] = useState<string[]>([]);
 
   useEffect(() => {
     getActivityCertFile().then(f => { setFile(f); setLoading(false); });
+    getSiteContent().then(c => {
+      setDesc(c.activityCertDesc);
+      setSubmitTitle(c.certSubmitTitle);
+      setSubmitMethods(c.certSubmitMethods);
+    });
   }, []);
 
   return (
     <div className="max-w-lg">
       <h2 className="text-2xl font-bold text-gray-800 mb-2">활동증명서</h2>
-      <p className="text-gray-500 text-sm mb-8">
-        아래 양식 파일을 다운로드 후 작성하여 총동아리연합회실(G301-1)에 제출하거나 카카오톡으로 전달해주세요.
-      </p>
+      <p className="text-gray-500 text-sm mb-8">{desc}</p>
 
       {loading ? (
         <div className="h-24 flex items-center justify-center text-gray-400 text-sm">불러오는 중...</div>
@@ -43,11 +49,12 @@ export default function ActivityCertPage() {
         </div>
       )}
 
-      <div className="mt-6 p-4 bg-gray-50 rounded-xl text-sm text-gray-600 space-y-1">
-        <p className="font-semibold text-gray-700 mb-2">제출 방법</p>
-        <p>• 파일 작성 후 총동아리연합회실 G301-1 직접 제출</p>
-        <p>• 또는 카카오톡 플러스친구로 파일 전달</p>
-      </div>
+      {(submitTitle || submitMethods.length > 0) && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-sm text-gray-600 space-y-1">
+          {submitTitle && <p className="font-semibold text-gray-700 mb-2">{submitTitle}</p>}
+          {submitMethods.map((m, i) => <p key={i}>• {m}</p>)}
+        </div>
+      )}
     </div>
   );
 }

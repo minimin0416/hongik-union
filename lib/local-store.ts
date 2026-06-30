@@ -70,6 +70,10 @@ export type SiteContent = {
   askTitle: string;
   askDesc: string;
   askCategories: string[];
+  activityCertDesc: string;
+  clubCertDesc: string;
+  certSubmitTitle: string;
+  certSubmitMethods: string[];
   footerTitle: string;
   footerCopyright: string;
 };
@@ -147,6 +151,10 @@ export const defaultContent: SiteContent = { // exported for sync init
   askTitle: '질문 있어요',
   askDesc: '궁금한 점을 남겨주시면 확인 후 답변드리겠습니다.',
   askCategories: ['동아리 등록 관련', '동아리방 관련', '지원금 관련', '증명서 발급 관련', '벌점 관련', '기타'],
+  activityCertDesc: '아래 양식 파일을 다운로드 후 작성하여 총동아리연합회실(G301-1)에 제출하거나 카카오톡으로 전달해주세요.',
+  clubCertDesc: '아래 양식 파일을 다운로드 후 작성하여 총동아리연합회실(G301-1)에 제출하거나 카카오톡으로 전달해주세요.',
+  certSubmitTitle: '제출 방법',
+  certSubmitMethods: ['파일 작성 후 총동아리연합회실 G301-1 직접 제출', '또는 카카오톡 플러스친구로 파일 전달'],
   footerTitle: '홍익대학교 총동아리연합회',
   footerCopyright: '© 2025 홍익대학교 총동아리연합회. All rights reserved.',
 };

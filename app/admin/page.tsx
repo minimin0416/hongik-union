@@ -746,12 +746,14 @@ function InfoTab() {
 
   const [actCert, setActCert] = useState<Attachment | null>(null);
   const [clubCert, setClubCert] = useState<Attachment | null>(null);
+  const [certSaved, setCertSaved] = useState(false);
   useEffect(() => { getActivityCertFile().then(setActCert); getClubCertFile().then(setClubCert); }, []);
   const uploadCert = async (file: File, kind: 'activity' | 'club') => {
     const att = await readFileAsBase64(file);
     if (kind === 'activity') { await saveActivityCertFile(att); setActCert(att); }
     else { await saveClubCertFile(att); setClubCert(att); }
   };
+  const saveCertContent = () => { if (content) { saveSiteContent(content); setCertSaved(true); setTimeout(() => setCertSaved(false), 2000); } };
 
   return (
     <div>
@@ -832,8 +834,33 @@ function InfoTab() {
         </>
       )}
 
-      {sub === 'cert' && (
+      {sub === 'cert' && content && (
         <div className="space-y-6">
+          {/* 텍스트 문구 편집 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+            <h3 className="font-semibold text-gray-700">페이지 문구 설정</h3>
+            <Field label="활동증명서 설명 문구">
+              <textarea rows={2} value={content.activityCertDesc ?? ''} onChange={(e) => setContent({ ...content, activityCertDesc: e.target.value })} className={inputCls} />
+            </Field>
+            <Field label="동아리증명서 설명 문구">
+              <textarea rows={2} value={content.clubCertDesc ?? ''} onChange={(e) => setContent({ ...content, clubCertDesc: e.target.value })} className={inputCls} />
+            </Field>
+            <Field label="제출 방법 섹션 제목">
+              <input value={content.certSubmitTitle ?? ''} onChange={(e) => setContent({ ...content, certSubmitTitle: e.target.value })} className={inputCls} />
+            </Field>
+            <Field label="제출 방법 항목 (한 줄에 하나씩)">
+              {(content.certSubmitMethods ?? []).map((m, i) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  <input value={m} onChange={(e) => { const a = [...(content.certSubmitMethods ?? [])]; a[i] = e.target.value; setContent({ ...content, certSubmitMethods: a }); }} className={inputCls + ' flex-1'} />
+                  <button onClick={() => { const a = (content.certSubmitMethods ?? []).filter((_, j) => j !== i); setContent({ ...content, certSubmitMethods: a }); }} className="text-red-400 hover:text-red-600 text-sm px-2">삭제</button>
+                </div>
+              ))}
+              <button onClick={() => setContent({ ...content, certSubmitMethods: [...(content.certSubmitMethods ?? []), ''] })} className="text-xs text-blue-600 hover:underline">+ 항목 추가</button>
+            </Field>
+            <div className="flex items-center gap-3"><SavedBadge show={certSaved} /><Btn onClick={saveCertContent}>저장</Btn></div>
+          </div>
+
+          {/* 파일 업로드 */}
           {([
             { label: '활동증명서', file: actCert, type: 'activity' as const },
             { label: '동아리증명서', file: clubCert, type: 'club' as const },
