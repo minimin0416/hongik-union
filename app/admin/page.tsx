@@ -747,10 +747,9 @@ function InfoTab() {
   const [actCert, setActCert] = useState<Attachment | null>(null);
   const [clubCert, setClubCert] = useState<Attachment | null>(null);
   useEffect(() => { getActivityCertFile().then(setActCert); getClubCertFile().then(setClubCert); }, []);
-  const uploadCert = async (file: File, type: 'activity' | 'club') => {
-    const url = await readFileAsBase64(file);
-    const att: Attachment = { name: file.name, type: file.type, url };
-    if (type === 'activity') { await saveActivityCertFile(att); setActCert(att); }
+  const uploadCert = async (file: File, kind: 'activity' | 'club') => {
+    const att = await readFileAsBase64(file);
+    if (kind === 'activity') { await saveActivityCertFile(att); setActCert(att); }
     else { await saveClubCertFile(att); setClubCert(att); }
   };
 
