@@ -1,103 +1,23 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { getInquiries, saveInquiries, getSiteContent, type Inquiry } from '@/lib/local-store';
-
 export default function AskPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: '', contact: '', email: '', category: '', message: '', isPublic: false });
-  const [pageTitle, setPageTitle] = useState('질문 있어요');
-  const [pageDesc, setPageDesc] = useState('궁금한 점을 남겨주시면 확인 후 답변드리겠습니다.');
-  const [categories, setCategories] = useState(['동아리 등록 관련', '동아리방 관련', '지원금 관련', '증명서 발급 관련', '벌점 관련', '기타']);
-
-  useEffect(() => {
-    getSiteContent().then(c => {
-      if (c.askTitle) setPageTitle(c.askTitle);
-      if (c.askDesc) setPageDesc(c.askDesc);
-      if (c.askCategories?.length) setCategories(c.askCategories);
-    });
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newInquiry: Inquiry = {
-      id: Date.now().toString(),
-      name: form.name, contact: form.contact, email: form.email,
-      category: form.category, message: form.message,
-      isPublic: form.isPublic,
-      status: 'pending',
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-    const existing = await getInquiries();
-    await saveInquiries([newInquiry, ...existing]);
-    setSubmitted(true);
-  };
-
-  if (submitted) {
-    return (
-      <div className="max-w-lg mx-auto text-center py-12">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">문의가 접수되었습니다</h3>
-        <p className="text-gray-500 text-sm mb-6">빠른 시일 내에 답변드리겠습니다.</p>
-        <button onClick={() => { setSubmitted(false); setForm({ name:'',contact:'',email:'',category:'',message:'',isPublic:false }); }}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-          다시 문의하기
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">{pageTitle}</h2>
-      <p className="text-gray-500 text-sm mb-6">{pageDesc}</p>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이름 <span className="text-red-500">*</span></label>
-            <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="이름" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
-            <input type="tel" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })}
-              placeholder="010-0000-0000" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">이메일 <span className="text-red-500">*</span></label>
-          <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="email@example.com" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">문의 유형 <span className="text-red-500">*</span></label>
-          <select required value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500 bg-white">
-            <option value="">선택하세요</option>
-            {categories.map(cat => <option key={cat}>{cat}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">문의 내용 <span className="text-red-500">*</span></label>
-          <textarea required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
-            placeholder="문의 내용을 자세히 작성해주세요" rows={5}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500 resize-none" />
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-          <input type="checkbox" checked={form.isPublic} onChange={(e) => setForm({ ...form, isPublic: e.target.checked })} className="w-4 h-4" />
-          <div>
-            <span className="text-sm font-medium text-gray-700">Q&A 게시판에 공개</span>
-            <p className="text-xs text-gray-400 mt-0.5">답변 완료 후 이름은 익명으로 공개 게시판에 표시됩니다</p>
-          </div>
-        </label>
-        <button type="submit" className="w-full bg-gray-800 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
-          문의 제출하기
-        </button>
-      </form>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">질문 있어요</h2>
+      <p className="text-gray-500 text-sm mb-8">카카오톡 플러스친구로 문의해주세요. 빠르게 답변드리겠습니다.</p>
+      <a
+        href="https://pf.kakao.com/_MIzDK"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-semibold text-base transition-all"
+        style={{ backgroundColor: '#FEE500', color: '#3A1D1D' }}
+        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#F0D800')}
+        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#FEE500')}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#3A1D1D">
+          <path d="M12 3C6.48 3 2 6.69 2 11.25c0 2.9 1.87 5.45 4.68 6.96L5.5 21l3.9-2.04C10.23 19.31 11.1 19.5 12 19.5c5.52 0 10-3.69 10-8.25S17.52 3 12 3z"/>
+        </svg>
+        카카오톡 플러스친구로 문의하기
+      </a>
+      <p className="text-xs text-gray-400 text-center mt-4">클릭 시 카카오톡 채팅으로 연결됩니다</p>
     </div>
   );
 }
