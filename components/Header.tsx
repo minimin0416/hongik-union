@@ -40,8 +40,7 @@ const navItems = [
     href: '/info',
     submenu: [
       { title: '규칙', href: '/info/rules' },
-      { title: '양식', href: '/info/forms' },
-      { title: '양식 가이드라인', href: '/info/forms' },
+      { title: '양식 및 가이드라인', href: '/info/forms' },
       { title: '활동증명서', href: '/info/activity-cert' },
       { title: '동아리증명서', href: '/info/club-cert' },
       { title: '벌점 현황', href: '/info/penalty' },
