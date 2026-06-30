@@ -1,11 +1,22 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { getSiteContent } from '@/lib/local-store';
+
 export default function AskPage() {
+  const [kakaoUrl, setKakaoUrl] = useState('');
+
+  useEffect(() => {
+    getSiteContent().then(c => setKakaoUrl(c.kakaoUrl || ''));
+  }, []);
+
   return (
     <div className="max-w-lg">
       <h2 className="text-2xl font-bold text-gray-800 mb-2">질문 있어요</h2>
       <p className="text-gray-500 text-sm mb-8">카카오톡 플러스친구로 문의해주세요. 빠르게 답변드리겠습니다.</p>
       <a
-        href="https://pf.kakao.com/_MIzDK"
-        target="_blank"
+        href={kakaoUrl || '#'}
+        target={kakaoUrl ? '_blank' : undefined}
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-3 w-full py-4 rounded-xl font-semibold text-base transition-all"
         style={{ backgroundColor: '#FEE500', color: '#3A1D1D' }}
