@@ -57,8 +57,11 @@ function ClubsContent() {
             <Link href={`/clubs/central/${club.id}`}>
               <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-gray-400 transition-all cursor-pointer h-full">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-600 font-bold text-sm">{club.name.slice(2, 4)}</span>
+                  <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {club.logoUrl
+                      ? <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
+                      : <span className="text-gray-600 font-bold text-sm">{club.name.slice(0, 2)}</span>
+                    }
                   </div>
                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
                     {club.category}

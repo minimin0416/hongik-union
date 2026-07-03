@@ -310,7 +310,7 @@ function AboutTab() {
 }
 
 /* ══════════ 탭: 동아리 소개 ══════════ */
-const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', imageUrl: '' });
+const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', logoUrl: '', imageUrl: '' });
 
 function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Promise<ClubData[]>; saveList: (v: ClubData[]) => void; label: string }) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
@@ -322,7 +322,7 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
   useEffect(() => { getList().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
   const startEdit = (c: ClubData) => {
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', imageUrl: c.imageUrl || '' });
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '' });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -379,6 +379,10 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
             <Field label="상세 소개"><textarea value={form.intro} onChange={(e) => setForm({ ...form, intro: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
             <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
             <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
+            <Field label="동아리 로고">
+              <ImageInput current={form.logoUrl} onUpload={(url) => setForm({ ...form, logoUrl: url })} onRemove={() => setForm({ ...form, logoUrl: '' })} />
+              <p className="text-xs text-gray-400 mt-1">카드 목록에 표시될 로고 (정사각형 이미지 권장)</p>
+            </Field>
             <Field label="소개 이미지">
               <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
             </Field>
