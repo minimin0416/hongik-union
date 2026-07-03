@@ -26,9 +26,15 @@ export default function Footer() {
           <p className="text-xs mt-1">위치: {address} · 이메일: {email}</p>
           <p className="text-xs mt-0.5">{copyright}</p>
         </div>
-        <Link href="/admin" className="text-xs text-gray-400 hover:text-white transition-colors">
-          관리자 페이지
-        </Link>
+        <div className="flex flex-col items-end gap-1.5">
+          <a href="https://www.hongik.ac.kr/kr/etc/privacy-policy.do" target="_blank" rel="noopener noreferrer"
+            className="text-xs text-gray-400 hover:text-white transition-colors">
+            개인정보 처리방침
+          </a>
+          <Link href="/admin" className="text-xs text-gray-400 hover:text-white transition-colors">
+            관리자 페이지
+          </Link>
+        </div>
       </div>
     </footer>
   );
