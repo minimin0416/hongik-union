@@ -309,6 +309,12 @@ export const getClubs = async (): Promise<ClubData[]> => {
 };
 export const saveClubs = (v: ClubData[]) => dbSet('hn_clubs', v);
 
+export const getProvisionalClubs = async (): Promise<ClubData[]> => {
+  const data = await dbGet<ClubData[]>('hn_provisional_clubs', []);
+  return data;
+};
+export const saveProvisionalClubs = (v: ClubData[]) => dbSet('hn_provisional_clubs', v);
+
 export const getSiteContent = async (): Promise<SiteContent> => {
   const data = await dbGet<Partial<SiteContent>>('hn_content', {});
   return { ...defaultContent, ...data };

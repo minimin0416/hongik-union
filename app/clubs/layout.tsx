@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const links = [
   { title: '중앙동아리', href: '/clubs/central' },
+  { title: '가동아리', href: '/clubs/provisional' },
   { title: '동아리방 위치', href: '/clubs/location' },
 ];
 

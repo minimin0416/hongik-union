@@ -8,7 +8,7 @@ import {
   getInquiries, saveInquiries, getBanners, saveBanners,
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
-  getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs,
+  getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs, getProvisionalClubs, saveProvisionalClubs,
   getActivityCertFile, saveActivityCertFile, getClubCertFile, saveClubCertFile,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment, saveNoticeImages, getNoticeImages,
@@ -312,29 +312,87 @@ function AboutTab() {
 /* ══════════ 탭: 동아리 소개 ══════════ */
 const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', imageUrl: '' });
 
-function ClubsTab() {
-  type Sub = 'list' | 'location';
-  const [sub, setSub] = useState<Sub>('list');
-
-  // 동아리 목록
+function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Promise<ClubData[]>; saveList: (v: ClubData[]) => void; label: string }) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
   const [form, setForm] = useState(emptyClub());
   const [editId, setEditId] = useState<number | null>(null);
   const [show, setShow] = useState(false);
   const [filter, setFilter] = useState('전체');
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => { getClubs().then(setClubs); }, []);
-  const saveList = (v: ClubData[]) => { setClubs(v); saveClubs(v); };
+  useEffect(() => { getList().then(setClubs); }, []);
+  const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
   const startEdit = (c: ClubData) => {
     setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', imageUrl: c.imageUrl || '' });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editId !== null) saveList(clubs.map((c) => c.id === editId ? { ...c, ...form } : c));
-    else { const id = clubs.length > 0 ? Math.max(...clubs.map(c => c.id)) + 1 : 1; saveList([...clubs, { id, ...form }]); }
+    if (editId !== null) save(clubs.map((c) => c.id === editId ? { ...c, ...form } : c));
+    else { const id = clubs.length > 0 ? Math.max(...clubs.map(c => c.id)) + 1 : 1; save([...clubs, { id, ...form }]); }
     setForm(emptyClub()); setEditId(null); setShow(false);
   };
+  const filtered = clubs.filter((c) => filter === '전체' || c.category === filter);
+  return (
+    <>
+      <div className="flex justify-between mb-3">
+        <div className="flex gap-1.5 flex-wrap">
+          {['전체', ...CATEGORIES].map((c) => (
+            <button key={c} onClick={() => setFilter(c)} className={cls('px-3 py-1 rounded-full text-xs font-medium border transition-colors', filter === c ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500')}>{c}</button>
+          ))}
+        </div>
+        <Btn onClick={() => { setForm(emptyClub()); setEditId(null); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100); }}>+ {label} 추가</Btn>
+      </div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+        {filtered.length === 0 && <EmptyState text={`${label}가 없습니다`} />}
+        {filtered.map((c) => (
+          <div key={c.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium text-gray-800 mr-2">{c.name}</span>
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c.category}</span>
+              <p className="text-xs text-gray-400 mt-0.5">{c.room || '동아리방 없음'} · 회장: {c.president || '미입력'}</p>
+            </div>
+            <div className="flex gap-1">
+              <Btn size="sm" variant="ghost" onClick={() => startEdit(c)}>수정</Btn>
+              <Btn size="sm" variant="danger" onClick={() => { if (confirm('삭제?')) save(clubs.filter((x) => x.id !== c.id)); }}>삭제</Btn>
+            </div>
+          </div>
+        ))}
+      </div>
+      {show && (
+        <div ref={ref} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+          <h3 className="font-bold text-gray-800 mb-4">{editId !== null ? `${label} 수정` : `${label} 추가`}</h3>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="동아리명" required><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} /></Field>
+              <Field label="분과">
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputCls + ' bg-white'}>
+                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
+              <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
+              <Field label="홈페이지"><input value={form.website ?? ''} onChange={(e) => setForm({ ...form, website: e.target.value })} className={inputCls} placeholder="https://..." /></Field>
+              <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
+              <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
+            </div>
+            <Field label="한 줄 소개"><input value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} className={inputCls} /></Field>
+            <Field label="상세 소개"><textarea value={form.intro} onChange={(e) => setForm({ ...form, intro: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
+            <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
+            <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
+            <Field label="소개 이미지">
+              <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
+            </Field>
+            <div className="flex gap-2"><Btn type="submit">{editId !== null ? '수정 완료' : '추가 완료'}</Btn><Btn variant="ghost" onClick={() => { setShow(false); setEditId(null); }}>취소</Btn></div>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ClubsTab() {
+  type Sub = 'central' | 'provisional' | 'location';
+  const [sub, setSub] = useState<Sub>('central');
 
   // 동아리방 위치
   const [content, setContent] = useState<SiteContent | null>(null);
@@ -343,68 +401,20 @@ function ClubsTab() {
   useEffect(() => { getSiteContent().then(setContent); getClubMapImage().then(setClubMapImage); }, []);
   const saveLocation = () => { if (content) { saveSiteContent(content); setLocSaved(true); setTimeout(() => setLocSaved(false), 2000); } };
 
-  const filtered = clubs.filter((c) => filter === '전체' || c.category === filter);
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-800">동아리 소개 관리</h2>
-        {sub === 'list' && <Btn onClick={() => { setForm(emptyClub()); setEditId(null); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100); }}>+ 동아리 추가</Btn>}
         {sub === 'location' && <div className="flex items-center gap-3"><SavedBadge show={locSaved}/><Btn onClick={saveLocation}>저장</Btn></div>}
       </div>
-      <SubNav<Sub> options={[['list','동아리 목록'], ['location','동아리방 위치']]} value={sub} onChange={setSub} />
+      <SubNav<Sub> options={[['central','중앙동아리'], ['provisional','가동아리'], ['location','동아리방 위치']]} value={sub} onChange={setSub} />
 
-      {sub === 'list' && (
-        <>
-          <div className="flex gap-1.5 flex-wrap mb-4">
-            {['전체', ...CATEGORIES].map((c) => (
-              <button key={c} onClick={() => setFilter(c)} className={cls('px-3 py-1 rounded-full text-xs font-medium border transition-colors', filter === c ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500')}>{c}</button>
-            ))}
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-            {filtered.length === 0 && <EmptyState text="동아리가 없습니다" />}
-            {filtered.map((c) => (
-              <div key={c.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-gray-800 mr-2">{c.name}</span>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c.category}</span>
-                  <p className="text-xs text-gray-400 mt-0.5">{c.room} · 회장: {c.president || '미입력'}</p>
-                </div>
-                <div className="flex gap-1">
-                  <Btn size="sm" variant="ghost" onClick={() => startEdit(c)}>수정</Btn>
-                  <Btn size="sm" variant="danger" onClick={() => { if (confirm('삭제?')) saveList(clubs.filter((x) => x.id !== c.id)); }}>삭제</Btn>
-                </div>
-              </div>
-            ))}
-          </div>
-          {show && (
-            <div ref={ref} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-              <h3 className="font-bold text-gray-800 mb-4">{editId !== null ? '동아리 수정' : '동아리 추가'}</h3>
-              <form onSubmit={submit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="동아리명" required><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} /></Field>
-                  <Field label="분과">
-                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputCls + ' bg-white'}>
-                      {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                    </select>
-                  </Field>
-                  <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
-                  <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
-                  <Field label="홈페이지"><input value={form.website ?? ''} onChange={(e) => setForm({ ...form, website: e.target.value })} className={inputCls} placeholder="https://..." /></Field>
-                  <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
-                  <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
-                </div>
-                <Field label="한 줄 소개"><input value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} className={inputCls} /></Field>
-                <Field label="상세 소개"><textarea value={form.intro} onChange={(e) => setForm({ ...form, intro: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
-                <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
-                <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
-                <Field label="소개 이미지">
-                  <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
-                </Field>
-                <div className="flex gap-2"><Btn type="submit">{editId !== null ? '수정 완료' : '추가 완료'}</Btn><Btn variant="ghost" onClick={() => { setShow(false); setEditId(null); }}>취소</Btn></div>
-              </form>
-            </div>
-          )}
-        </>
+      {sub === 'central' && (
+        <ClubListPanel getList={getClubs} saveList={(v) => saveClubs(v)} label="중앙동아리" />
+      )}
+
+      {sub === 'provisional' && (
+        <ClubListPanel getList={getProvisionalClubs} saveList={(v) => saveProvisionalClubs(v)} label="가동아리" />
       )}
 
       {sub === 'location' && content && (
