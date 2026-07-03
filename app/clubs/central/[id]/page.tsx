@@ -28,7 +28,6 @@ export default function ClubDetailPage() {
 
   const infoRows = [
     { label: '회장', value: club.president },
-    { label: '연락처', value: club.contact },
     { label: '동아리방', value: club.room },
     { label: '모집 기간', value: club.recruitPeriod },
     { label: '정기모임', value: club.meetingSchedule },
@@ -57,12 +56,11 @@ export default function ClubDetailPage() {
               <span className="text-sm text-gray-800">{r.value}</span>
             </div>
           ))}
-          {club.instagram && (
+          {club.website && (
             <div className="flex items-center px-6 py-3.5">
-              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0">인스타그램</span>
-              <a href={`https://instagram.com/${club.instagram.replace('@', '')}`}
-                target="_blank" rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline">{club.instagram}</a>
+              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0">홈페이지</span>
+              <a href={club.website} target="_blank" rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline truncate">{club.website}</a>
             </div>
           )}
         </div>
@@ -130,17 +128,16 @@ export default function ClubDetailPage() {
         </div>
       )}
 
-      {/* 인스타 문의 */}
-      {club.instagram && (
+      {/* 홈페이지 바로가기 */}
+      {club.website && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-700">더 궁금한 점이 있으신가요?</p>
-            <p className="text-xs text-gray-500 mt-0.5">인스타그램 DM으로 문의해주세요</p>
+            <p className="text-xs text-gray-500 mt-0.5">홈페이지에서 자세한 정보를 확인하세요</p>
           </div>
-          <a href={`https://instagram.com/${club.instagram.replace('@', '')}`}
-            target="_blank" rel="noopener noreferrer"
+          <a href={club.website} target="_blank" rel="noopener noreferrer"
             className="px-4 py-2 bg-gray-800 text-white text-sm rounded-lg font-medium hover:bg-gray-700 transition-colors">
-            인스타 바로가기
+            홈페이지 바로가기
           </a>
         </div>
       )}

@@ -310,7 +310,7 @@ function AboutTab() {
 }
 
 /* ══════════ 탭: 동아리 소개 ══════════ */
-const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', contact: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], instagram: '', imageUrl: '' });
+const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', imageUrl: '' });
 
 function ClubsTab() {
   type Sub = 'list' | 'location';
@@ -326,7 +326,7 @@ function ClubsTab() {
   useEffect(() => { getClubs().then(setClubs); }, []);
   const saveList = (v: ClubData[]) => { setClubs(v); saveClubs(v); };
   const startEdit = (c: ClubData) => {
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, contact: c.contact, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], instagram: c.instagram, imageUrl: c.imageUrl || '' });
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', imageUrl: c.imageUrl || '' });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -389,8 +389,7 @@ function ClubsTab() {
                   </Field>
                   <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
                   <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
-                  <Field label="연락처"><input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} className={inputCls} placeholder="010-0000-0000" /></Field>
-                  <Field label="인스타그램"><input value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} className={inputCls} placeholder="@계정명" /></Field>
+                  <Field label="홈페이지"><input value={form.website ?? ''} onChange={(e) => setForm({ ...form, website: e.target.value })} className={inputCls} placeholder="https://..." /></Field>
                   <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
                   <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
                 </div>

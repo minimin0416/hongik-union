@@ -46,7 +46,7 @@ export const downloadFile = (url: string, name: string) => {
 /* ── 타입 정의 ── */
 export type Attachment = { url: string; name: string; type: string; stored?: boolean };
 export type Notice = { id: string; title: string; content: string; isPinned: boolean; createdAt: string; attachment?: Attachment; imageUrl?: string; hasImages?: boolean };
-export type ClubData = { id: number; name: string; category: string; room: string; president: string; contact: string; recruitPeriod: string; meetingSchedule: string; intro: string; desc: string; activities: string[]; targets: string[]; instagram: string; imageUrl?: string };
+export type ClubData = { id: number; name: string; category: string; room: string; president: string; recruitPeriod: string; meetingSchedule: string; intro: string; desc: string; activities: string[]; targets: string[]; website?: string; imageUrl?: string };
 export type Minutes = { id: string; title: string; date: string; attendees: string; attachment?: Attachment };
 export type ClubNews = { id: string; club: string; category: string; title: string; content: string; date: string; imageUrl?: string };
 export type Penalty = { id: string; club: string; reason: string; points: number; date: string };
