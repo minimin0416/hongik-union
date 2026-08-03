@@ -310,7 +310,7 @@ function AboutTab() {
 }
 
 /* ══════════ 탭: 동아리 소개 ══════════ */
-const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', logoUrl: '', imageUrl: '' });
+const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', logoUrl: '', imageUrl: '', imageUrls: [] });
 
 function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Promise<ClubData[]>; saveList: (v: ClubData[]) => void; label: string }) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
@@ -322,7 +322,7 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
   useEffect(() => { getList().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
   const startEdit = (c: ClubData) => {
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '' });
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '', imageUrls: c.imageUrls || [] });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -383,8 +383,34 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
               <ImageInput current={form.logoUrl} onUpload={(url) => setForm({ ...form, logoUrl: url })} onRemove={() => setForm({ ...form, logoUrl: '' })} />
               <p className="text-xs text-gray-400 mt-1">카드 목록에 표시될 로고 (정사각형 이미지 권장)</p>
             </Field>
-            <Field label="소개 이미지">
-              <ImageInput current={form.imageUrl} onUpload={(url) => setForm({ ...form, imageUrl: url })} onRemove={() => setForm({ ...form, imageUrl: '' })} />
+            <Field label="활동 사진 (여러 장)">
+              <div className="space-y-2">
+                {(form.imageUrls ?? []).map((url, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <img src={url} alt="" className="h-16 rounded-lg object-cover border border-gray-200" />
+                    <div className="flex flex-col gap-1">
+                      <label className="cursor-pointer px-2 py-1 border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50">
+                        교체<input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0]; if (!file) return;
+                          const compressed = await compressImage(file, 1200, 0.85);
+                          const next = [...(form.imageUrls ?? [])]; next[i] = compressed;
+                          setForm({ ...form, imageUrls: next });
+                        }} />
+                      </label>
+                      <button type="button" onClick={() => { const next = (form.imageUrls ?? []).filter((_, j) => j !== i); setForm({ ...form, imageUrls: next }); }}
+                        className="px-2 py-1 border border-red-300 rounded text-xs text-red-500 hover:bg-red-50">삭제</button>
+                    </div>
+                  </div>
+                ))}
+                <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 border-2 border-dashed border-gray-300 rounded-lg text-xs text-gray-500 hover:border-gray-400 hover:bg-gray-50 w-fit">
+                  🖼️ 사진 추가
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    const compressed = await compressImage(file, 1200, 0.85);
+                    setForm({ ...form, imageUrls: [...(form.imageUrls ?? []), compressed] });
+                  }} />
+                </label>
+              </div>
             </Field>
             <div className="flex gap-2"><Btn type="submit">{editId !== null ? '수정 완료' : '추가 완료'}</Btn><Btn variant="ghost" onClick={() => { setShow(false); setEditId(null); }}>취소</Btn></div>
           </form>
