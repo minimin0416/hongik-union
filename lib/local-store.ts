@@ -64,7 +64,7 @@ export type SiteContent = {
   bannerSlides: BannerSlide[]; aboutIntro: string; aboutVision: string; workItems: WorkItem[];
   locationAddress: string; locationHours: string; locationPhone: string; locationEmail: string;
   rules: string; rulesFile?: Attachment; faqs: FaqItem[]; electionIntro: string; electionValues: ElectionValue[];
-  instagramUrl: string; kakaoUrl: string;
+  instagramUrl: string; kakaoUrl: string; notionReservationUrl?: string;
   clubBuildings: ClubBuilding[];
   infoRules: InfoRule[];
   askTitle: string;

@@ -1350,6 +1350,14 @@ function SettingsTab() {
         </Field>
       </div>
 
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
+        <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3">🏟️ 체육관·운동장 예약 페이지</h3>
+        <Field label="노션 페이지 URL">
+          <input value={content.notionReservationUrl ?? ''} onChange={(e) => setContent({ ...content, notionReservationUrl: e.target.value })} className={inputCls} placeholder="https://app.notion.com/p/..." />
+          <p className="text-xs text-gray-400 mt-1">정보마당 → 체육관·운동장 예약에 표시될 노션 페이지 주소 (공개 설정된 노션 URL)</p>
+        </Field>
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
         <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3">관리자 비밀번호 변경</h3>
         <PwChangeForm />
