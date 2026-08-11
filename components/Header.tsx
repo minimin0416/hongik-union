@@ -45,6 +45,7 @@ const navItems = [
       { title: '활동증명서', href: '/info/activity-cert' },
       { title: '동아리증명서', href: '/info/club-cert' },
       { title: '벌점 현황', href: '/info/penalty' },
+      { title: '🏟️ 체육관·운동장 예약', href: '/info/reservation' },
     ],
   },
   {
