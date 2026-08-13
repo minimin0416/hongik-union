@@ -310,7 +310,7 @@ function AboutTab() {
 }
 
 /* ══════════ 탭: 동아리 소개 ══════════ */
-const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', logoUrl: '', imageUrl: '', imageUrls: [] });
+const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', websites: [], logoUrl: '', imageUrl: '', imageUrls: [] });
 
 function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Promise<ClubData[]>; saveList: (v: ClubData[]) => void; label: string }) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
@@ -322,7 +322,7 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
   useEffect(() => { getList().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
   const startEdit = (c: ClubData) => {
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '', imageUrls: c.imageUrls || [] });
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', websites: c.websites?.length ? c.websites : [], logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '', imageUrls: c.imageUrls || [] });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -371,7 +371,20 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
               </Field>
               <Field label="동아리방"><input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className={inputCls} placeholder="예: A동 101호" /></Field>
               <Field label="회장"><input value={form.president} onChange={(e) => setForm({ ...form, president: e.target.value })} className={inputCls} /></Field>
-              <Field label="홈페이지"><input value={form.website ?? ''} onChange={(e) => setForm({ ...form, website: e.target.value })} className={inputCls} placeholder="https://..." /></Field>
+              <Field label="SNS / 링크 (여러 개)">
+                <div className="space-y-1.5">
+                  {(form.websites ?? []).map((url, i) => (
+                    <div key={i} className="flex gap-1.5">
+                      <input value={url} onChange={(e) => { const next = [...(form.websites ?? [])]; next[i] = e.target.value; setForm({ ...form, websites: next }); }}
+                        className={inputCls + ' flex-1'} placeholder="https://www.instagram.com/..." />
+                      <button type="button" onClick={() => setForm({ ...form, websites: (form.websites ?? []).filter((_, j) => j !== i) })}
+                        className="px-2 py-1 text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => setForm({ ...form, websites: [...(form.websites ?? []), ''] })}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium">+ 링크 추가</button>
+                </div>
+              </Field>
               <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
               <Field label="정기모임"><input value={form.meetingSchedule} onChange={(e) => setForm({ ...form, meetingSchedule: e.target.value })} className={inputCls} placeholder="예: 매주 화·목 18:00" /></Field>
             </div>

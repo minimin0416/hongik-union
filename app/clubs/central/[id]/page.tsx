@@ -5,6 +5,34 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getClubs, type ClubData } from '@/lib/local-store';
 
+function snsInfo(url: string): { label: string; icon: string; color: string } {
+  if (url.includes('instagram')) return { label: '인스타그램', icon: '📷', color: 'bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200' };
+  if (url.includes('youtube')) return { label: '유튜브', icon: '▶️', color: 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' };
+  if (url.includes('naver') || url.includes('cafe')) return { label: '네이버 카페', icon: '🔗', color: 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200' };
+  if (url.includes('tistory')) return { label: '블로그', icon: '✏️', color: 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200' };
+  return { label: '웹사이트', icon: '🌐', color: 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200' };
+}
+
+function SnsLink({ url }: { url: string }) {
+  const { label, icon, color } = snsInfo(url);
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${color}`}>
+      <span>{icon}</span>{label}
+    </a>
+  );
+}
+
+function SnsButton({ url }: { url: string }) {
+  const { label, icon, color } = snsInfo(url);
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${color}`}>
+      <span>{icon}</span>{label} 바로가기
+    </a>
+  );
+}
+
 export default function ClubDetailPage() {
   const params = useParams();
   const [club, setClub] = useState<ClubData | null>(null);
@@ -61,11 +89,14 @@ export default function ClubDetailPage() {
               <span className="text-sm text-gray-800">{r.value}</span>
             </div>
           ))}
-          {club.website && (
-            <div className="flex items-center px-6 py-3.5">
-              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0">홈페이지</span>
-              <a href={club.website} target="_blank" rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline truncate">{club.website}</a>
+          {(club.websites?.length || club.website) && (
+            <div className="flex items-start px-6 py-3.5">
+              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0 pt-0.5">SNS</span>
+              <div className="flex flex-wrap gap-2">
+                {(club.websites?.length ? club.websites : club.website ? [club.website] : []).map((url, i) => (
+                  <SnsLink key={i} url={url} />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -133,17 +164,15 @@ export default function ClubDetailPage() {
         </div>
       )}
 
-      {/* 홈페이지 바로가기 */}
-      {club.website && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-700">더 궁금한 점이 있으신가요?</p>
-            <p className="text-xs text-gray-500 mt-0.5">홈페이지에서 자세한 정보를 확인하세요</p>
+      {/* SNS 바로가기 버튼 (하단) */}
+      {(club.websites?.length || club.website) && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6">
+          <p className="text-sm font-medium text-gray-700 mb-3">더 알아보기</p>
+          <div className="flex flex-wrap gap-2">
+            {(club.websites?.length ? club.websites : club.website ? [club.website] : []).map((url, i) => (
+              <SnsButton key={i} url={url} />
+            ))}
           </div>
-          <a href={club.website} target="_blank" rel="noopener noreferrer"
-            className="px-4 py-2 bg-gray-800 text-white text-sm rounded-lg font-medium hover:bg-gray-700 transition-colors">
-            홈페이지 바로가기
-          </a>
         </div>
       )}
     </div>

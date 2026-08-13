@@ -16,10 +16,12 @@ function ProvisionalContent() {
   const [clubs, setClubs] = useState<ClubData[]>([]);
   useEffect(() => { getProvisionalClubs().then(setClubs); }, []);
 
-  const filtered = clubs.filter(
-    (c) => (selected === '전체' || c.category === selected) &&
-      (search === '' || c.name.includes(search) || c.desc.includes(search))
-  );
+  const filtered = clubs
+    .filter(
+      (c) => (selected === '전체' || c.category === selected) &&
+        (search === '' || c.name.includes(search) || c.desc.includes(search))
+    )
+    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
 
   return (
     <div>
