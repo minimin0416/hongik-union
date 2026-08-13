@@ -84,9 +84,9 @@ export default function ClubDetailPage() {
         </div>
         <div className="divide-y divide-gray-100">
           {infoRows.map((r) => (
-            <div key={r.label} className="flex items-center px-6 py-3.5">
-              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0">{r.label}</span>
-              <span className="text-sm text-gray-800">{r.value}</span>
+            <div key={r.label} className="flex items-start px-6 py-3.5">
+              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0 pt-0.5">{r.label}</span>
+              <span className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">{r.value}</span>
             </div>
           ))}
           {(club.websites?.length || club.website) && (
@@ -124,7 +124,7 @@ export default function ClubDetailPage() {
             <span className="w-1 h-5 bg-gray-800 rounded-full inline-block"></span>
             우리 동아리를 소개할게요
           </h2>
-          <p className="text-gray-600 leading-relaxed text-sm">{club.intro}</p>
+          <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">{club.intro}</p>
         </div>
       )}
 
