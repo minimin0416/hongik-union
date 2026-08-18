@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, defaultContent, type Notice, type BannerSlide, type CalendarEvent } from '@/lib/local-store';
+import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
 import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -174,6 +174,11 @@ export default function HomePage() {
     const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
     return c.mainIntroText ?? '';
   });
+  const [minutes, setMinutes] = useState<Minutes[]>(() => syncGet('hn_minutes', []));
+  const [clubBuildings, setClubBuildings] = useState<ClubBuilding[]>(() => {
+    const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
+    return c.clubBuildings ?? [];
+  });
 
   // 로더 상태
   const startTimeRef = useRef(Date.now());
@@ -189,10 +194,12 @@ export default function HomePage() {
         setSlides(c.bannerSlides);
         setMainIntroEnabled(c.mainIntroEnabled ?? false);
         setMainIntroText(c.mainIntroText ?? '');
+        setClubBuildings(c.clubBuildings ?? []);
       }),
       getBanners().then(setBannerImgs),
       getLocationImage().then(setLocationImg),
       getCalendarEvents().then(setCalEvents),
+      getMinutes().then(setMinutes),
     ]).then(() => {
       setReady(true);
       if (!hasCache) {
@@ -224,7 +231,7 @@ export default function HomePage() {
       {/* 로딩 화면 퇴장 오버레이 */}
       {showLoader && <LoaderScreen exiting={loaderExiting} />}
 
-      <div style={{ background: '#e8e8e8', minHeight: '100vh', animation: 'sr-fade-in 0.5s ease both' }}>
+      <div style={{ background: '#EDE8F5', minHeight: '100vh', animation: 'sr-fade-in 0.5s ease both' }}>
 
         {/* ── Hero 배너 슬라이더 (크게) ── */}
         <div className="relative w-full overflow-hidden" style={{ height: 'clamp(520px, 72vh, 860px)' }}>
@@ -236,8 +243,8 @@ export default function HomePage() {
             : <div className="absolute inset-0 bg-gradient-to-br from-[#2D1B6E] via-[#5B3FA8] to-[#8B6BC9]" />
           }
 
-          {/* 그라디언트 오버레이 — 라벤더 톤 */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(45,27,110,0.55) 0%, rgba(91,63,168,0.30) 40%, rgba(45,27,110,0.65) 100%)' }} />
+          {/* 그라디언트 오버레이 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
           {/* 슬라이드 텍스트 — key로 재애니메이션 */}
           {currentSlideData && (currentSlideData.title || currentSlideData.subtitle) && (
@@ -296,6 +303,64 @@ export default function HomePage() {
           </ScrollReveal>
         )}
 
+        {/* ── 빠른 링크 카드 3개 ── */}
+        <div className="w-full px-8 lg:px-14 pt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[
+            {
+              href: '/about/intro',
+              title: '총동아리연합회 소개',
+              desc: '홍익대학교 총동아리연합회를 소개합니다.',
+              icon: (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7C5CBF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                  <rect x="9" y="3" width="6" height="4" rx="1"/>
+                  <line x1="9" y1="12" x2="15" y2="12"/>
+                  <line x1="9" y1="16" x2="13" y2="16"/>
+                </svg>
+              ),
+              delay: 0,
+            },
+            {
+              href: '/contact/faq',
+              title: 'FAQ',
+              desc: '동아리 관련 질문을 답변드립니다.',
+              icon: (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7C5CBF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  <line x1="9" y1="10" x2="15" y2="10"/>
+                  <line x1="9" y1="14" x2="13" y2="14"/>
+                </svg>
+              ),
+              delay: 80,
+            },
+            {
+              href: '/info/activity-cert',
+              title: '활동증명서 신청',
+              desc: '활동증명서 발급을 도와드립니다.',
+              icon: (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7C5CBF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <polyline points="9 12 11 14 15 10"/>
+                </svg>
+              ),
+              delay: 160,
+            },
+          ].map(({ href, title, desc, icon, delay }) => (
+            <ScrollReveal key={href} animation="fade-up" delay={delay}>
+              <Link href={href}
+                className="flex items-center justify-between gap-4 bg-white rounded-2xl px-7 py-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <div>
+                  <p className="text-lg font-bold text-gray-900 group-hover:text-[#7C5CBF] transition-colors">{title}</p>
+                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">{desc}</p>
+                </div>
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#F4F0FB' }}>
+                  {icon}
+                </div>
+              </Link>
+            </ScrollReveal>
+          ))}
+        </div>
+
         {/* ── 달력 + 공지사항 ── */}
         <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
           <ScrollReveal animation="fade-right" delay={0}>
@@ -316,6 +381,56 @@ export default function HomePage() {
                   <span className="text-sm text-gray-400 flex-shrink-0">{n.createdAt}</span>
                 </Link>
               ))}
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* ── 동아리방 위치 + 회의록 ── */}
+        <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* 동아리방 위치 */}
+          <ScrollReveal animation="fade-right" delay={0}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-700">동아리방 위치</h2>
+              <Link href="/clubs/location" className="text-sm text-[#7C5CBF] hover:underline">자세히 보기 →</Link>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              {clubBuildings.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {clubBuildings.slice(0, 5).map((b, i) => (
+                    <div key={i} className="flex items-start gap-3 px-5 py-3.5">
+                      <span className="text-xs font-bold text-white px-2 py-0.5 rounded flex-shrink-0 mt-0.5" style={{ background: '#7C5CBF' }}>{b.building}</span>
+                      <span className="text-sm text-gray-600 leading-relaxed">{b.clubs.filter(Boolean).join(', ')}</span>
+                    </div>
+                  ))}
+                  {clubBuildings.length > 5 && (
+                    <div className="px-5 py-3 text-sm text-gray-400 text-center">+ {clubBuildings.length - 5}개 건물 더 보기</div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-gray-400 text-sm">동아리방 위치 정보가 없습니다</div>
+              )}
+            </div>
+          </ScrollReveal>
+
+          {/* 회의록 */}
+          <ScrollReveal animation="fade-left" delay={100}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-700">회의록</h2>
+              <Link href="/news/minutes" className="text-sm text-[#7C5CBF] hover:underline">전체 보기 →</Link>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ minHeight: '140px' }}>
+              {minutes.length > 0 ? minutes.slice(0, 5).map((m, idx) => (
+                <Link key={m.id} href="/news/minutes"
+                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < Math.min(minutes.length, 5) - 1 ? 'border-b border-gray-100' : ''}`}>
+                  <svg className="w-4 h-4 text-[#9B7DD4] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="flex-1 text-gray-700 truncate">{m.title}</span>
+                  <span className="text-sm text-gray-400 flex-shrink-0">{m.date}</span>
+                </Link>
+              )) : (
+                <div className="h-32 flex items-center justify-center text-gray-400 text-sm">등록된 회의록이 없습니다</div>
+              )}
             </div>
           </ScrollReveal>
         </div>
