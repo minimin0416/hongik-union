@@ -266,13 +266,14 @@ export default function HomePage() {
               />
             )}
             {currentSlideData && currentSlideData.title && (
-              <h1 className="hero-title font-black drop-shadow-lg leading-tight w-full text-center px-4"
-                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)' }}>
+              <h1 className="hero-title font-black leading-tight w-full text-center px-4"
+                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)', color: '#111827', textShadow: '0 1px 8px rgba(255,255,255,0.4)' }}>
                 {currentSlideData.title}
               </h1>
             )}
             {currentSlideData && currentSlideData.subtitle && (
-              <p className="hero-sub text-base md:text-xl text-white/85 drop-shadow max-w-2xl">
+              <p className="hero-sub text-base md:text-xl max-w-2xl"
+                style={{ color: '#374151', textShadow: '0 1px 6px rgba(255,255,255,0.4)' }}>
                 {currentSlideData.subtitle}
               </p>
             )}
