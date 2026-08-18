@@ -20,7 +20,7 @@ export default function ActivityCertPage() {
   }, []);
 
   return (
-    <div className="max-w-lg">
+    <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-2">활동증명서</h2>
       <p className="text-gray-500 text-sm mb-8">{desc}</p>
 

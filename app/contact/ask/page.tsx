@@ -11,9 +11,9 @@ export default function AskPage() {
   }, []);
 
   return (
-    <div className="max-w-lg">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">질문 있어요</h2>
-      <p className="text-gray-500 text-sm mb-8">카카오톡 플러스친구로 문의해주세요. 빠르게 답변드리겠습니다.</p>
+    <div>
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-3">질문 있어요</h2>
+      <p className="text-gray-500 text-lg mb-8">카카오톡 플러스친구로 문의해주세요. 빠르게 답변드리겠습니다.</p>
       <a
         href={kakaoUrl || '#'}
         target={kakaoUrl ? '_blank' : undefined}

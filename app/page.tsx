@@ -227,13 +227,13 @@ export default function HomePage() {
       <div style={{ background: '#e8e8e8', minHeight: '100vh', animation: 'sr-fade-in 0.5s ease both' }}>
 
         {/* ── Hero 배너 슬라이더 (크게) ── */}
-        <div className="relative w-full overflow-hidden" style={{ height: 'clamp(340px, 52vw, 560px)' }}>
+        <div className="relative w-full overflow-hidden" style={{ height: 'clamp(520px, 72vh, 860px)' }}>
 
           {/* 배경 이미지 — key로 슬라이드 전환 시 재애니메이션 */}
           {currentBg
             ? <img key={`bg-${currentSlide}`} src={currentBg} alt="배너"
                 className="absolute inset-0 w-full h-full object-cover hero-img-bg" />
-            : <div className="absolute inset-0 bg-gradient-to-br from-[#001a52] via-[#003087] to-[#0052a5]" />
+            : <div className="absolute inset-0 bg-gradient-to-br from-[#2D1B6E] via-[#5B3FA8] to-[#8B6BC9]" />
           }
 
           {/* 그라디언트 오버레이 */}
@@ -289,7 +289,7 @@ export default function HomePage() {
           <ScrollReveal animation="fade-up" delay={0}>
             <div className="w-full bg-white border-b border-gray-200 px-8 lg:px-14 py-10">
               <div className="max-w-3xl">
-                <div className="w-10 h-1 bg-[#003087] rounded mb-4" />
+                <div className="w-10 h-1 bg-[#7C5CBF] rounded mb-4" />
                 <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{mainIntroText}</p>
               </div>
             </div>
@@ -310,8 +310,8 @@ export default function HomePage() {
             <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ minHeight: '220px' }}>
               {notices.map((n, idx) => (
                 <Link key={n.id} href="/news/notices"
-                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-blue-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                  {n.isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
+                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  {n.isPinned && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
                   <span className="flex-1 text-gray-700 truncate">{n.title}</span>
                   <span className="text-sm text-gray-400 flex-shrink-0">{n.createdAt}</span>
                 </Link>
@@ -329,7 +329,7 @@ export default function HomePage() {
               : <div className="w-full h-full flex items-center justify-center text-gray-400 text-base">
                   <div className="text-center">
                     <p>지도 이미지를 업로드해주세요</p>
-                    <Link href="/about/location" className="text-blue-500 text-sm hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
+                    <Link href="/about/location" className="text-[#7C5CBF] text-sm hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
                   </div>
                 </div>
             }

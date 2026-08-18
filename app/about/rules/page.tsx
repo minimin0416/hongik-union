@@ -31,7 +31,7 @@ export default function RulesPage() {
   };
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-6">회칙</h2>
       {file ? (
         <>

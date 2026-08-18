@@ -35,7 +35,7 @@ function Btn({ children, onClick, variant = 'dark', size = 'md', type = 'button'
     danger: 'bg-red-500 text-white hover:bg-red-600',
     ghost:  'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50',
     green:  'bg-green-500 text-white hover:bg-green-600',
-    blue:   'bg-blue-600 text-white hover:bg-blue-700',
+    blue:   'bg-[#7C5CBF] text-white hover:bg-[#5A3FA3]',
   };
   const s = size === 'sm' ? 'px-2.5 py-1.5 text-xs' : size === 'xs' ? 'px-2 py-1 text-xs' : 'px-4 py-2 text-sm';
   return (
@@ -74,9 +74,9 @@ function FileInput({ onUpload, current }: { onUpload: (a: Attachment) => void; c
         <input ref={ref} type="file" className="hidden" onChange={handle} />
       </label>
       {current && (
-        <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-2.5 py-1.5">
-          <span className="text-xs text-blue-700 truncate max-w-48">{current.name}</span>
-          <button type="button" onClick={() => downloadFile(current.url, current.name)} className="text-xs text-blue-500 hover:underline">다운로드</button>
+        <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-lg px-2.5 py-1.5">
+          <span className="text-xs text-purple-700 truncate max-w-48">{current.name}</span>
+          <button type="button" onClick={() => downloadFile(current.url, current.name)} className="text-xs text-[#7C5CBF] hover:underline">다운로드</button>
         </div>
       )}
     </div>
@@ -122,7 +122,7 @@ function DynList({ label, values, onChange }: { label: string; values: string[];
           <button type="button" onClick={() => remove(i)} className="text-gray-400 hover:text-red-500 text-lg leading-none w-7">×</button>
         </div>
       ))}
-      <button type="button" onClick={add} className="text-xs text-blue-600 hover:underline mt-0.5">+ 항목 추가</button>
+      <button type="button" onClick={add} className="text-xs text-[#7C5CBF] hover:underline mt-0.5">+ 항목 추가</button>
     </div>
   );
 }
@@ -142,10 +142,10 @@ function ListRow({ title, sub, isPinned, onEdit, onDelete, attachment }:
     <div className="flex items-start gap-3 px-5 py-3.5 border-b border-gray-100 last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          {isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">고정</span>}
+          {isPinned && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">고정</span>}
           <span className="text-sm font-medium text-gray-800">{title}</span>
           {attachment && (
-            <button onClick={() => downloadFile(attachment.url, attachment.name)} className="text-xs text-blue-500 hover:underline flex items-center gap-0.5">📎{attachment.name}</button>
+            <button onClick={() => downloadFile(attachment.url, attachment.name)} className="text-xs text-[#7C5CBF] hover:underline flex items-center gap-0.5">📎{attachment.name}</button>
           )}
         </div>
         {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
@@ -226,7 +226,7 @@ function AboutTab() {
               <input value={w.desc} placeholder="설명" onChange={(e) => { const a = [...content.workItems]; a[i] = { ...a[i], desc: e.target.value }; setContent({ ...content, workItems: a }); }} className={inputCls} />
             </div>
           ))}
-          <button onClick={() => setContent({ ...content, workItems: [...content.workItems, { title: '', desc: '' }] })} className="text-xs text-blue-600 hover:underline">+ 업무 추가</button>
+          <button onClick={() => setContent({ ...content, workItems: [...content.workItems, { title: '', desc: '' }] })} className="text-xs text-[#7C5CBF] hover:underline">+ 업무 추가</button>
         </div>
       )}
 
@@ -390,7 +390,7 @@ function ClubListPanel({ getList, saveList: saveFn, label, getImages }: {
                     </div>
                   ))}
                   <button type="button" onClick={() => setForm({ ...form, websites: [...(form.websites ?? []), ''] })}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium">+ 링크 추가</button>
+                    className="text-xs text-[#7C5CBF] hover:text-[#5A3FA3] font-medium">+ 링크 추가</button>
                 </div>
               </Field>
               <Field label="모집 기간"><input value={form.recruitPeriod} onChange={(e) => setForm({ ...form, recruitPeriod: e.target.value })} className={inputCls} placeholder="예: 매 학기 초 모집" /></Field>
@@ -506,10 +506,10 @@ function ClubsTab() {
                     <button onClick={() => { const a=[...content.clubBuildings]; a[bi]={...a[bi],clubs:a[bi].clubs.filter((_,i)=>i!==ci)}; setContent({...content,clubBuildings:a}); }} className="text-gray-400 hover:text-red-500 text-lg leading-none w-7">×</button>
                   </div>
                 ))}
-                <button onClick={() => { const a=[...content.clubBuildings]; a[bi]={...a[bi],clubs:[...a[bi].clubs,'']}; setContent({...content,clubBuildings:a}); }} className="text-xs text-blue-600 hover:underline">+ 동아리 추가</button>
+                <button onClick={() => { const a=[...content.clubBuildings]; a[bi]={...a[bi],clubs:[...a[bi].clubs,'']}; setContent({...content,clubBuildings:a}); }} className="text-xs text-[#7C5CBF] hover:underline">+ 동아리 추가</button>
               </div>
             ))}
-            <button onClick={() => setContent({...content, clubBuildings:[...(content.clubBuildings??[]),{building:'',clubs:['']}]})} className="text-xs text-blue-600 hover:underline">+ 건물 추가</button>
+            <button onClick={() => setContent({...content, clubBuildings:[...(content.clubBuildings??[]),{building:'',clubs:['']}]})} className="text-xs text-[#7C5CBF] hover:underline">+ 건물 추가</button>
           </div>
           <button onClick={saveLocation} className={cls('w-full py-3 rounded-xl text-sm font-bold transition-all', locSaved?'bg-green-500 text-white':'bg-gray-800 text-white hover:bg-gray-700')}>{locSaved?'✓ 저장 완료!':'저장하기'}</button>
         </div>
@@ -613,7 +613,7 @@ function NewsTab() {
             <Btn onClick={() => { setEvForm({ title:'', startDate:new Date().toISOString().slice(0,10), endDate:new Date().toISOString().slice(0,10), color:'#3B82F6' }); setEvEditId(null); setEvShow(true); }}>+ 일정 추가</Btn>
           </div>
           {evShow && (
-            <form onSubmit={submitEv} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitEv} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{evEditId ? '일정 수정' : '일정 추가'}</h3>
               <Field label="제목" required><input required value={evForm.title} onChange={(e) => setEvForm({...evForm, title:e.target.value})} className={inputCls} placeholder="일정 제목" /></Field>
               <div className="grid grid-cols-2 gap-3">
@@ -658,7 +658,7 @@ function NewsTab() {
             <Btn onClick={() => { setNForm({ title: '', content: '', isPinned: false, attachment: undefined }); setNEditId(null); setNShow(true); }}>+ 새 공지 작성</Btn>
           </div>
           {nShow && (
-            <form onSubmit={submitN} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitN} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{nEditId ? '공지 수정' : '새 공지 작성'}</h3>
               <Field label="제목" required><input required value={nForm.title} onChange={(e) => setNForm({ ...nForm, title: e.target.value })} className={inputCls} placeholder="공지사항 제목" /></Field>
               <Field label="내용"><textarea value={nForm.content} onChange={(e) => setNForm({ ...nForm, content: e.target.value })} rows={5} className={inputCls + ' resize-none'} /></Field>
@@ -713,7 +713,7 @@ function NewsTab() {
             <Btn onClick={() => { setMForm({ title: '', date: '', attendees: '', attachment: undefined }); setMEditId(null); setMShow(true); }}>+ 회의록 추가</Btn>
           </div>
           {mShow && (
-            <form onSubmit={submitM} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitM} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{mEditId ? '회의록 수정' : '회의록 추가'}</h3>
               <Field label="회의 제목" required><input required value={mForm.title} onChange={(e) => setMForm({ ...mForm, title: e.target.value })} className={inputCls} /></Field>
               <div className="grid grid-cols-2 gap-3">
@@ -741,7 +741,7 @@ function NewsTab() {
             <Btn onClick={() => { setCnForm({ club: '', category: '공연분과', title: '', content: '', date: new Date().toISOString().slice(0, 10), imageUrl: '' }); setCnEditId(null); setCnShow(true); }}>+ 동아리 소식 추가</Btn>
           </div>
           {cnShow && (
-            <form onSubmit={submitCN} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitCN} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{cnEditId ? '소식 수정' : '소식 추가'}</h3>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="동아리명" required><input required value={cnForm.club} onChange={(e) => setCnForm({ ...cnForm, club: e.target.value })} className={inputCls} /></Field>
@@ -839,7 +839,7 @@ function InfoTab() {
               </div>
             ))}
           </div>
-          <button onClick={() => setContent({...content, infoRules:[...(content.infoRules??[]),{title:'',desc:''}]})} className="text-xs text-blue-600 hover:underline mb-4 block">+ 규칙 추가</button>
+          <button onClick={() => setContent({...content, infoRules:[...(content.infoRules??[]),{title:'',desc:''}]})} className="text-xs text-[#7C5CBF] hover:underline mb-4 block">+ 규칙 추가</button>
           <div className="flex items-center gap-3"><SavedBadge show={ruleSaved}/><Btn onClick={saveRules}>저장</Btn></div>
         </div>
       )}
@@ -848,7 +848,7 @@ function InfoTab() {
         <>
           <div className="flex justify-end mb-3"><Btn onClick={() => { setFForm({ name: '', description: '', fileType: 'HWP', updatedAt: new Date().toISOString().slice(0, 7), attachment: undefined }); setFEditId(null); setFShow(true); }}>+ 양식 추가</Btn></div>
           {fShow && (
-            <form onSubmit={submitF} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitF} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{fEditId ? '양식 수정' : '양식 추가'}</h3>
               <Field label="양식명" required><input required value={fForm.name} onChange={(e) => setFForm({ ...fForm, name: e.target.value })} className={inputCls} /></Field>
               <Field label="설명"><input value={fForm.description} onChange={(e) => setFForm({ ...fForm, description: e.target.value })} className={inputCls} /></Field>
@@ -918,7 +918,7 @@ function InfoTab() {
                   <button onClick={() => { const a = (content.certSubmitMethods ?? []).filter((_, j) => j !== i); setContent({ ...content, certSubmitMethods: a }); }} className="text-red-400 hover:text-red-600 text-sm px-2">삭제</button>
                 </div>
               ))}
-              <button onClick={() => setContent({ ...content, certSubmitMethods: [...(content.certSubmitMethods ?? []), ''] })} className="text-xs text-blue-600 hover:underline">+ 항목 추가</button>
+              <button onClick={() => setContent({ ...content, certSubmitMethods: [...(content.certSubmitMethods ?? []), ''] })} className="text-xs text-[#7C5CBF] hover:underline">+ 항목 추가</button>
             </Field>
             <div className="flex items-center gap-3"><SavedBadge show={certSaved} /><Btn onClick={saveCertContent}>저장</Btn></div>
           </div>
@@ -932,7 +932,7 @@ function InfoTab() {
               <h3 className="font-semibold text-gray-700 mb-3">{label} 양식 파일</h3>
               {file ? (
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-3">
-                  <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[#7C5CBF] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
@@ -1006,7 +1006,7 @@ function ElectionTab() {
                 <input value={v.desc} placeholder="설명" onChange={(e) => { const a=[...content.electionValues]; a[i]={...a[i],desc:e.target.value}; setContent({...content,electionValues:a}); }} className={inputCls} />
               </div>
             ))}
-            <button onClick={() => setContent({...content, electionValues:[...(content.electionValues??[]),{title:'',desc:''}]})} className="text-xs text-blue-600 hover:underline">+ 가치 추가</button>
+            <button onClick={() => setContent({...content, electionValues:[...(content.electionValues??[]),{title:'',desc:''}]})} className="text-xs text-[#7C5CBF] hover:underline">+ 가치 추가</button>
           </div>
           <div className="flex items-center gap-3">
             <SavedBadge show={saved} />
@@ -1019,7 +1019,7 @@ function ElectionTab() {
         <>
           <div className="flex justify-end mb-3"><Btn onClick={() => { setEForm({ title: '', content: '', date: new Date().toISOString().slice(0, 10), status: '예정', attachment: undefined }); setEEditId(null); setEShow(true); }}>+ 공고 추가</Btn></div>
           {eShow && (
-            <form onSubmit={submitE} className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4 space-y-3">
+            <form onSubmit={submitE} className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4 space-y-3">
               <h3 className="font-semibold text-gray-700">{eEditId ? '공고 수정' : '공고 추가'}</h3>
               <Field label="제목" required><input required value={eForm.title} onChange={(e) => setEForm({ ...eForm, title: e.target.value })} className={inputCls} /></Field>
               <Field label="내용"><textarea value={eForm.content} onChange={(e) => setEForm({ ...eForm, content: e.target.value })} rows={4} className={inputCls + ' resize-none'} /></Field>
@@ -1097,7 +1097,7 @@ function ContactTab() {
               </div>
             ))}
           </div>
-          <button onClick={() => setContent({ ...content, faqs: [...content.faqs, { q: '', a: '' }] })} className="text-xs text-blue-600 hover:underline mb-4 block">+ FAQ 추가</button>
+          <button onClick={() => setContent({ ...content, faqs: [...content.faqs, { q: '', a: '' }] })} className="text-xs text-[#7C5CBF] hover:underline mb-4 block">+ FAQ 추가</button>
           <div className="flex items-center gap-3">
             <SavedBadge show={saved} />
             <Btn onClick={save}>저장</Btn>
@@ -1187,7 +1187,7 @@ function ContactTab() {
                 <button onClick={() => setContent({...content, askCategories: content.askCategories.filter((_,j)=>j!==i)})} className="text-gray-400 hover:text-red-500 text-lg leading-none w-7">×</button>
               </div>
             ))}
-            <button onClick={() => setContent({...content, askCategories:[...(content.askCategories??[]),'새 유형']})} className="text-xs text-blue-600 hover:underline mt-1 block">+ 유형 추가</button>
+            <button onClick={() => setContent({...content, askCategories:[...(content.askCategories??[]),'새 유형']})} className="text-xs text-[#7C5CBF] hover:underline mt-1 block">+ 유형 추가</button>
           </div>
           <div className="flex items-center gap-3">
             <SavedBadge show={saved}/>
@@ -1420,7 +1420,7 @@ function SettingsTab() {
             <span className="text-sm text-gray-500">{content.topBannerEnabled ? '표시 중' : '숨김'}</span>
             <div
               onClick={() => setContent({ ...content, topBannerEnabled: !content.topBannerEnabled })}
-              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.topBannerEnabled ? 'bg-[#003087]' : 'bg-gray-300'}`}
+              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.topBannerEnabled ? 'bg-[#7C5CBF]' : 'bg-gray-300'}`}
             >
               <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${content.topBannerEnabled ? 'left-5' : 'left-0.5'}`} />
             </div>
@@ -1441,7 +1441,7 @@ function SettingsTab() {
             <span className="text-sm text-gray-500">{content.mainIntroEnabled ? '표시 중' : '숨김'}</span>
             <div
               onClick={() => setContent({ ...content, mainIntroEnabled: !content.mainIntroEnabled })}
-              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.mainIntroEnabled ? 'bg-[#003087]' : 'bg-gray-300'}`}
+              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.mainIntroEnabled ? 'bg-[#7C5CBF]' : 'bg-gray-300'}`}
             >
               <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${content.mainIntroEnabled ? 'left-5' : 'left-0.5'}`} />
             </div>
@@ -1598,7 +1598,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <button onClick={syncAll} disabled={syncing}
-            className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium transition-colors">
+            className="text-xs px-3 py-1.5 rounded-lg bg-[#7C5CBF] hover:bg-[#5A3FA3] disabled:opacity-50 text-white font-medium transition-colors">
             {syncing ? '동기화 중...' : syncDone ? '✓ 완료' : '☁️ 전체 동기화'}
           </button>
           <button onClick={logout} className="text-gray-400 hover:text-white text-sm transition-colors">로그아웃</button>

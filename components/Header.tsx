@@ -98,7 +98,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
       {/* 알림 배너 */}
       {topBannerEnabled && topBannerText && (
-        <div className="w-full bg-[#003087] text-white text-center py-2.5 px-4 text-sm font-medium tracking-wide">
+        <div className="w-full text-white text-center py-2.5 px-4 text-sm font-medium tracking-wide" style={{ background: 'linear-gradient(90deg, #5A3FA3, #9B7DD4)' }}>
           {topBannerText}
         </div>
       )}
@@ -126,14 +126,15 @@ export default function Header() {
                     href={item.href}
                     className={`px-4 xl:px-5 h-full flex items-center text-base font-semibold transition-colors whitespace-nowrap border-b-2 ${
                       isActive
-                        ? 'text-gray-900 border-gray-900'
+                        ? 'border-b-2'
                         : 'text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300'
                     }`}
+                    style={isActive ? { color: '#7C5CBF', borderBottomColor: '#7C5CBF' } : undefined}
                   >
                     {item.title}
                   </Link>
                   {/* Dropdown */}
-                  <div className="absolute top-full left-0 hidden group-hover:block min-w-40 bg-white shadow-lg rounded-b-lg overflow-hidden z-50 border-t-2 border-gray-900">
+                  <div className="absolute top-full left-0 hidden group-hover:block min-w-40 bg-white shadow-lg rounded-b-lg overflow-hidden z-50" style={{ borderTop: '2px solid #7C5CBF' }}>
                     {item.submenu.map((sub) => (
                       <Link
                         key={sub.href + sub.title}

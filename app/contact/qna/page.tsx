@@ -11,7 +11,7 @@ export default function QnaPage() {
   }, []);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-2">Q&A 게시판</h2>
       <p className="text-gray-500 text-sm mb-6">답변이 완료된 문의 내용을 공개합니다.</p>
       {list.length === 0 && (

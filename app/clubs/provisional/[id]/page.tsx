@@ -66,110 +66,114 @@ export default function ProvisionalClubDetailPage() {
   const snsUrls = club.websites?.length ? club.websites : club.website ? [club.website] : [];
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Link href="/clubs/provisional" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div>
+      <Link href="/clubs/provisional" className="inline-flex items-center gap-1.5 text-base text-gray-500 hover:text-gray-800 mb-8 transition-colors">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         가동아리 목록으로
       </Link>
 
-      {/* 기본 정보 */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-        <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">{club.category}</span>
-            <h1 className="text-2xl font-bold text-gray-900 mt-2">{club.name}</h1>
-            {club.desc && <p className="text-gray-500 text-sm mt-1">{club.desc}</p>}
-          </div>
-          {club.logoUrl && !club.logoUrl.startsWith('__stored_') && (
-            <img src={club.logoUrl} alt={`${club.name} 로고`} className="w-20 h-20 rounded-xl object-contain border border-gray-100 flex-shrink-0" />
-          )}
-        </div>
-        <div className="divide-y divide-gray-100">
-          {infoRows.map((r) => (
-            <div key={r.label} className="flex items-start px-6 py-3.5">
-              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0 pt-0.5">{r.label}</span>
-              <span className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">{r.value}</span>
+      {/* 기본 정보 + 활동 사진 (2열) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* 기본 정보 */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-7 pt-7 pb-5 border-b border-gray-100 flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <span className="text-sm bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">{club.category}</span>
+              <h1 className="text-3xl font-bold text-gray-900 mt-3">{club.name}</h1>
+              {club.desc && <p className="text-gray-500 text-base mt-2 leading-relaxed">{club.desc}</p>}
             </div>
-          ))}
-          {snsUrls.length > 0 && (
-            <div className="flex items-start px-6 py-3.5">
-              <span className="w-24 text-sm text-gray-500 font-medium flex-shrink-0 pt-0.5">SNS</span>
-              <div className="flex flex-wrap gap-2">
-                {snsUrls.map((url, i) => <SnsLink key={i} url={url} />)}
+            {club.logoUrl && !club.logoUrl.startsWith('__stored_') && (
+              <img src={club.logoUrl} alt={`${club.name} 로고`} className="w-24 h-24 rounded-xl object-contain border border-gray-100 flex-shrink-0" />
+            )}
+          </div>
+          <div className="divide-y divide-gray-100">
+            {infoRows.map((r) => (
+              <div key={r.label} className="flex items-start px-7 py-4">
+                <span className="w-28 text-base text-gray-500 font-medium flex-shrink-0 pt-0.5">{r.label}</span>
+                <span className="text-base text-gray-800 whitespace-pre-line leading-relaxed">{r.value}</span>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 활동 사진 */}
-      {(() => {
-        const imgs = club.imageUrls?.length ? club.imageUrls : club.imageUrl ? [club.imageUrl] : [];
-        if (!imgs.length) return null;
-        return (
-          <div className={`mb-6 ${imgs.length > 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
-            {imgs.map((src, i) => (
-              <img key={i} src={src} alt={`${club.name} 활동사진 ${i + 1}`}
-                className="w-full rounded-xl object-cover"
-                style={{ maxHeight: imgs.length === 1 ? '280px' : '200px' }} />
             ))}
+            {snsUrls.length > 0 && (
+              <div className="flex items-start px-7 py-4">
+                <span className="w-28 text-base text-gray-500 font-medium flex-shrink-0 pt-0.5">SNS</span>
+                <div className="flex flex-wrap gap-2">
+                  {snsUrls.map((url, i) => <SnsLink key={i} url={url} />)}
+                </div>
+              </div>
+            )}
           </div>
-        );
-      })()}
+        </div>
+
+        {/* 활동 사진 */}
+        {(() => {
+          const imgs = club.imageUrls?.length ? club.imageUrls : club.imageUrl ? [club.imageUrl] : [];
+          if (!imgs.length) return <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-base">활동 사진 없음</div>;
+          return (
+            <div className={imgs.length > 1 ? 'grid grid-cols-2 gap-2 content-start' : ''}>
+              {imgs.map((src, i) => (
+                <img key={i} src={src} alt={`${club.name} 활동사진 ${i + 1}`}
+                  className="w-full rounded-xl object-cover"
+                  style={{ maxHeight: imgs.length === 1 ? '320px' : '220px' }} />
+              ))}
+            </div>
+          );
+        })()}
+      </div>
 
       {/* 동아리 소개 */}
       {club.intro && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span className="w-1 h-5 bg-amber-500 rounded-full inline-block"></span>
+        <div className="bg-white rounded-xl border border-gray-200 p-7 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-amber-500 rounded-full inline-block"></span>
             우리 동아리를 소개할게요
           </h2>
-          <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">{club.intro}</p>
+          <p className="text-gray-600 leading-relaxed text-base whitespace-pre-line">{club.intro}</p>
         </div>
       )}
 
-      {/* 활동 내용 */}
-      {club.activities?.filter(Boolean).length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span className="w-1 h-5 bg-amber-500 rounded-full inline-block"></span>
-            활동 내용
-          </h2>
-          <ul className="space-y-2">
-            {club.activities.filter(Boolean).map((a, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                <span className="w-5 h-5 rounded-full bg-amber-50 text-amber-600 text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">{i + 1}</span>
-                {a}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* 활동 내용 + 환영 대상 (2열) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {club.activities?.filter(Boolean).length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-7">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-amber-500 rounded-full inline-block"></span>
+              활동 내용
+            </h2>
+            <ul className="space-y-2.5">
+              {club.activities.filter(Boolean).map((a, i) => (
+                <li key={i} className="flex items-start gap-3 text-base text-gray-600">
+                  <span className="w-6 h-6 rounded-full bg-amber-50 text-amber-600 text-sm flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">{i + 1}</span>
+                  {a}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {/* 환영 대상 */}
-      {club.targets?.filter(Boolean).length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span className="w-1 h-5 bg-amber-500 rounded-full inline-block"></span>
-            이런 분을 환영해요
-          </h2>
-          <ul className="space-y-2">
-            {club.targets.filter(Boolean).map((t, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                <span className="text-amber-500 flex-shrink-0 mt-0.5">✓</span>
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {club.targets?.filter(Boolean).length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-7">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-amber-500 rounded-full inline-block"></span>
+              이런 분을 환영해요
+            </h2>
+            <ul className="space-y-2.5">
+              {club.targets.filter(Boolean).map((t, i) => (
+                <li key={i} className="flex items-start gap-3 text-base text-gray-600">
+                  <span className="text-amber-500 flex-shrink-0 mt-0.5 text-lg">✓</span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
-      {/* SNS 바로가기 */}
+      {/* SNS */}
       {snsUrls.length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6">
-          <p className="text-sm font-medium text-gray-700 mb-3">더 알아보기</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
+          <p className="text-base font-medium text-gray-700 mb-3">더 알아보기</p>
           <div className="flex flex-wrap gap-2">
             {snsUrls.map((url, i) => <SnsButton key={i} url={url} />)}
           </div>

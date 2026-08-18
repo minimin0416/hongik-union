@@ -9,8 +9,8 @@ export default function FaqPage() {
   useEffect(() => { getSiteContent().then(c => setFaqs(c.faqs)); }, []);
 
   return (
-    <div className="max-w-3xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">자주 묻는 질문</h2>
+    <div>
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-8">자주 묻는 질문</h2>
       <div className="space-y-2">
         {faqs.map((faq, i) => (
           <ScrollReveal key={i} animation="fade-up" delay={i * 70}>

@@ -12,8 +12,8 @@ export default function LocationPage() {
   }, []);
 
   return (
-    <div className="max-w-3xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">오시는 길</h2>
+    <div>
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-8">오시는 길</h2>
       <div className="rounded-xl overflow-hidden mb-6" style={{ minHeight: '280px' }}>
         {mapImage ? (
           <img src={mapImage} alt="오시는 길 지도" className="w-full object-cover rounded-xl" />

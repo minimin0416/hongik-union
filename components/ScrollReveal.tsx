@@ -30,10 +30,16 @@ export default function ScrollReveal({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // 진입 시: 클래스 제거 후 reflow → 다시 추가 (애니메이션 재실행)
+          el.classList.remove('sr-visible', `sr-${animation}`);
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          el.offsetHeight; // force reflow
           el.style.animationDelay = `${delay}ms`;
           el.style.animationDuration = `${duration}ms`;
           el.classList.add('sr-visible', `sr-${animation}`);
-          observer.unobserve(el);
+        } else {
+          // 벗어날 시: 클래스 제거 → 다음 진입 때 다시 애니메이션
+          el.classList.remove('sr-visible', `sr-${animation}`);
         }
       },
       { threshold }
