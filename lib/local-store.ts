@@ -76,6 +76,10 @@ export type SiteContent = {
   certSubmitMethods: string[];
   footerTitle: string;
   footerCopyright: string;
+  topBannerEnabled?: boolean;
+  topBannerText?: string;
+  mainIntroEnabled?: boolean;
+  mainIntroText?: string;
 };
 
 /* ── 기본값 ── */
@@ -157,6 +161,10 @@ export const defaultContent: SiteContent = { // exported for sync init
   certSubmitMethods: ['파일 작성 후 총동아리연합회실 G301-1 직접 제출', '또는 카카오톡 플러스친구로 파일 전달'],
   footerTitle: '홍익대학교 총동아리연합회',
   footerCopyright: '© 2025 홍익대학교 총동아리연합회. All rights reserved.',
+  topBannerEnabled: false,
+  topBannerText: '📢 공지: 홍익대학교 총동아리연합회 공식 홈페이지입니다.',
+  mainIntroEnabled: false,
+  mainIntroText: '홍익대학교 총동아리연합회에 오신 것을 환영합니다.\n총동아리연합회는 홍익대학교 내 모든 중앙동아리를 대표하는 학생 자치 기구로, 동아리 문화의 발전을 위해 노력하고 있습니다.',
 };
 
 /* ── DB 헬퍼 (캐시 우선 + 백그라운드 갱신) ── */

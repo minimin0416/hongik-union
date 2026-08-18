@@ -72,12 +72,19 @@ export default function Header() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [instagramUrl, setInstagramUrl] = useState('');
   const [kakaoUrl, setKakaoUrl] = useState('');
+  const [topBannerEnabled, setTopBannerEnabled] = useState(false);
+  const [topBannerText, setTopBannerText] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     try { return localStorage.getItem('hn_logo') || ''; } catch { return ''; }
   });
   useEffect(() => {
-    getSiteContent().then(c => { setInstagramUrl(c.instagramUrl); setKakaoUrl(c.kakaoUrl); });
+    getSiteContent().then(c => {
+      setInstagramUrl(c.instagramUrl);
+      setKakaoUrl(c.kakaoUrl);
+      setTopBannerEnabled(c.topBannerEnabled ?? false);
+      setTopBannerText(c.topBannerText ?? '');
+    });
     getLogo().then(v => setLogoUrl(v || ''));
     const handler = (e: Event) => {
       const { key, value } = (e as CustomEvent).detail;
@@ -89,6 +96,12 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
+      {/* 알림 배너 */}
+      {topBannerEnabled && topBannerText && (
+        <div className="w-full bg-[#003087] text-white text-center py-2.5 px-4 text-sm font-medium tracking-wide">
+          {topBannerText}
+        </div>
+      )}
       <div className="w-full px-8 lg:px-14">
         <div className="flex items-center h-20">
           {/* Logo */}

@@ -1335,6 +1335,48 @@ function SettingsTab() {
         <div className="flex items-center gap-3"><SavedBadge show={saved} /><Btn onClick={save}>저장</Btn></div>
       </div>
 
+      {/* 알림 배너 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <h3 className="font-semibold text-gray-700">📢 상단 알림 배너</h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-sm text-gray-500">{content.topBannerEnabled ? '표시 중' : '숨김'}</span>
+            <div
+              onClick={() => setContent({ ...content, topBannerEnabled: !content.topBannerEnabled })}
+              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.topBannerEnabled ? 'bg-[#003087]' : 'bg-gray-300'}`}
+            >
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${content.topBannerEnabled ? 'left-5' : 'left-0.5'}`} />
+            </div>
+          </label>
+        </div>
+        <Field label="배너 문구">
+          <input value={content.topBannerText ?? ''} onChange={(e) => setContent({ ...content, topBannerText: e.target.value })}
+            className={inputCls} placeholder="📢 공지: 2025년 동아리 등록 기간은 3월 4일 ~ 3월 15일입니다." />
+          <p className="text-xs text-gray-400 mt-1">헤더 위에 파란 배너로 표시됩니다. 토글로 켜고 끌 수 있습니다.</p>
+        </Field>
+      </div>
+
+      {/* 메인 소개글 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <h3 className="font-semibold text-gray-700">📝 메인 소개글</h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-sm text-gray-500">{content.mainIntroEnabled ? '표시 중' : '숨김'}</span>
+            <div
+              onClick={() => setContent({ ...content, mainIntroEnabled: !content.mainIntroEnabled })}
+              className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${content.mainIntroEnabled ? 'bg-[#003087]' : 'bg-gray-300'}`}
+            >
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${content.mainIntroEnabled ? 'left-5' : 'left-0.5'}`} />
+            </div>
+          </label>
+        </div>
+        <Field label="소개 문구">
+          <textarea value={content.mainIntroText ?? ''} rows={4} onChange={(e) => setContent({ ...content, mainIntroText: e.target.value })}
+            className={inputCls + ' resize-none'} placeholder="홍익대학교 총동아리연합회에 오신 것을 환영합니다..." />
+          <p className="text-xs text-gray-400 mt-1">메인 히어로 배너 아래에 표시됩니다. 줄바꿈 적용됩니다.</p>
+        </Field>
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
         <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3 mb-4">메인 배너 텍스트</h3>
         {content.bannerSlides.map((s, i) => (

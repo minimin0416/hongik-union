@@ -166,6 +166,14 @@ export default function HomePage() {
   const [bannerImgs, setBannerImgs] = useState<string[]>(() => syncGet('hn_banners', []));
   const [locationImg, setLocationImg] = useState(() => syncGetStr('hn_location_image'));
   const [calEvents, setCalEvents] = useState<CalendarEvent[]>(() => syncGet('hn_calendar_events', []));
+  const [mainIntroEnabled, setMainIntroEnabled] = useState(() => {
+    const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
+    return c.mainIntroEnabled ?? false;
+  });
+  const [mainIntroText, setMainIntroText] = useState(() => {
+    const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
+    return c.mainIntroText ?? '';
+  });
 
   // 로더 상태
   const startTimeRef = useRef(Date.now());
@@ -177,7 +185,11 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       getNotices().then(setNotices),
-      getSiteContent().then(c => setSlides(c.bannerSlides)),
+      getSiteContent().then(c => {
+        setSlides(c.bannerSlides);
+        setMainIntroEnabled(c.mainIntroEnabled ?? false);
+        setMainIntroText(c.mainIntroText ?? '');
+      }),
       getBanners().then(setBannerImgs),
       getLocationImage().then(setLocationImg),
       getCalendarEvents().then(setCalEvents),
@@ -271,6 +283,18 @@ export default function HomePage() {
             style={{ animation: 'hero-scroll-bounce 1.8s 1.5s ease infinite', transform: 'translateX(-50%)', opacity: 0, animationFillMode: 'forwards', animationDelay: '1.5s' }}>
           </div>
         </div>
+
+        {/* ── 메인 소개글 ── */}
+        {mainIntroEnabled && mainIntroText && (
+          <ScrollReveal animation="fade-up" delay={0}>
+            <div className="w-full bg-white border-b border-gray-200 px-8 lg:px-14 py-10">
+              <div className="max-w-3xl">
+                <div className="w-10 h-1 bg-[#003087] rounded mb-4" />
+                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{mainIntroText}</p>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
 
         {/* ── 달력 + 공지사항 ── */}
         <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
