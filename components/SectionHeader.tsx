@@ -19,22 +19,26 @@ export default function SectionHeader({ title, subtitle }: Props) {
   }, []);
 
   return (
-    <div
-      className="section-header"
-      style={bannerImg ? {
-        backgroundImage: `url(${bannerImg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      } : undefined}
-    >
-      {/* 배너 이미지 있을 때 오버레이 */}
+    <div className="section-header" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* 배너 이미지 */}
       {bannerImg && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'rgba(20, 10, 50, 0.45)',
-        }} />
+        <>
+          <img
+            src={bannerImg}
+            alt=""
+            aria-hidden
+            style={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center',
+            }}
+          />
+          {/* 어두운 오버레이 — 글씨 가독성 */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(15, 8, 40, 0.48)',
+          }} />
+        </>
       )}
       <div style={{ position: 'relative', zIndex: 1 }}>
         <h1>{title}</h1>

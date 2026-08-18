@@ -36,7 +36,12 @@ body {
 
 .section-header {
   background: linear-gradient(135deg, #5A3FA3 0%, #9B7DD4 100%);
-  padding: 5rem 1rem;
+  min-height: 42vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
   text-align: center;
   color: white;
 }

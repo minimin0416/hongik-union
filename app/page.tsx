@@ -256,7 +256,7 @@ export default function HomePage() {
       <div style={{ background: '#EDE8F5', minHeight: '100vh', animation: 'sr-fade-in 0.5s ease both' }}>
 
         {/* ── Hero 배너 슬라이더 (크게) ── */}
-        <div className="relative w-full overflow-hidden" style={{ height: 'clamp(520px, 72vh, 860px)' }}>
+        <div className="relative w-full overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
 
           {/* 배경 이미지 — key로 슬라이드 전환 시 재애니메이션 */}
           {currentBg
