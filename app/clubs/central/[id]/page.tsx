@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getClubs, type ClubData } from '@/lib/local-store';
+import { getClubs, getClubLogo, getClubImages, type ClubData } from '@/lib/local-store';
 
 function snsInfo(url: string): { label: string; icon: string; color: string } {
   if (url.includes('instagram')) return { label: '인스타그램', icon: '📷', color: 'bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200' };
@@ -39,10 +39,16 @@ export default function ClubDetailPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    getClubs().then(clubs => {
-    const found = clubs.find((c) => c.id === Number(params.id));
-    if (found) setClub(found);
-    else setNotFound(true);
+    getClubs().then(async (clubs) => {
+      const found = clubs.find((c) => c.id === Number(params.id));
+      if (!found) { setNotFound(true); return; }
+      // 로고/이미지를 별도 키에서 로드
+      const id = found.id;
+      const [logo, imgs] = await Promise.all([
+        found.logoUrl?.startsWith('__stored_') ? getClubLogo(id) : Promise.resolve(found.logoUrl ?? ''),
+        getClubImages(id),
+      ]);
+      setClub({ ...found, logoUrl: logo, imageUrls: imgs.length ? imgs : (found.imageUrls ?? []) });
     });
   }, [params.id]);
 

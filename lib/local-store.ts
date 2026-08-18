@@ -299,21 +299,64 @@ export const getNoticeImages = async (id: string): Promise<string[]> => {
 };
 
 export const getClubs = async (): Promise<ClubData[]> => {
-  const data = await dbGet<ClubData[]>('hn_clubs', []);
-  if (data.length === 0) {
-    const seeded = (defaultClubs as any[]).map((c) => ({ ...c, instagram: c.instagram ?? '', imageUrl: '' })) as ClubData[];
-    await dbSet('hn_clubs', seeded);
-    return seeded;
-  }
-  return data;
+  return dbGet<ClubData[]>('hn_clubs', []);
 };
-export const saveClubs = (v: ClubData[]) => dbSet('hn_clubs', v);
+export const saveClubs = (v: ClubData[]) => {
+  // 이미지를 별도 키로 분리해서 저장 (payload 크기 초과 방지)
+  const stripped = v.map((c) => {
+    const { logoUrl, imageUrls, imageUrl, ...rest } = c;
+    if (logoUrl && logoUrl.startsWith('data:')) {
+      dbSetStr(`hn_club_logo_${c.id}`, logoUrl);
+    }
+    if (imageUrls && imageUrls.length > 0) {
+      dbSetStr(`hn_club_imgs_${c.id}`, JSON.stringify(imageUrls));
+    }
+    return {
+      ...rest,
+      logoUrl: logoUrl?.startsWith('data:') ? `__stored_${c.id}__` : (logoUrl ?? ''),
+      imageUrl: imageUrl ?? '',
+      imageUrls: [],
+    };
+  });
+  return dbSet('hn_clubs', stripped);
+};
+
+// 클럽 로고/이미지를 별도 키에서 로드
+export const getClubLogo = (id: number): Promise<string> => dbGetStr(`hn_club_logo_${id}`);
+export const getClubImages = async (id: number): Promise<string[]> => {
+  const v = await dbGetStr(`hn_club_imgs_${id}`);
+  return v ? (JSON.parse(v) as string[]) : [];
+};
+export const saveClubLogo = (id: number, url: string) => dbSetStr(`hn_club_logo_${id}`, url);
+export const saveClubImages = (id: number, urls: string[]) => dbSetStr(`hn_club_imgs_${id}`, JSON.stringify(urls));
 
 export const getProvisionalClubs = async (): Promise<ClubData[]> => {
   const data = await dbGet<ClubData[]>('hn_provisional_clubs', []);
   return data;
 };
-export const saveProvisionalClubs = (v: ClubData[]) => dbSet('hn_provisional_clubs', v);
+export const saveProvisionalClubs = (v: ClubData[]) => {
+  const stripped = v.map((c) => {
+    const { logoUrl, imageUrls, imageUrl, ...rest } = c;
+    if (logoUrl && logoUrl.startsWith('data:')) {
+      dbSetStr(`hn_pclub_logo_${c.id}`, logoUrl);
+    }
+    if (imageUrls && imageUrls.length > 0) {
+      dbSetStr(`hn_pclub_imgs_${c.id}`, JSON.stringify(imageUrls));
+    }
+    return {
+      ...rest,
+      logoUrl: logoUrl?.startsWith('data:') ? `__stored_${c.id}__` : (logoUrl ?? ''),
+      imageUrl: imageUrl ?? '',
+      imageUrls: [],
+    };
+  });
+  return dbSet('hn_provisional_clubs', stripped);
+};
+export const getProvisionalClubLogo = (id: number): Promise<string> => dbGetStr(`hn_pclub_logo_${id}`);
+export const getProvisionalClubImages = async (id: number): Promise<string[]> => {
+  const v = await dbGetStr(`hn_pclub_imgs_${id}`);
+  return v ? (JSON.parse(v) as string[]) : [];
+};
 
 export const getSiteContent = async (): Promise<SiteContent> => {
   const data = await dbGet<Partial<SiteContent>>('hn_content', {});

@@ -8,7 +8,9 @@ import {
   getInquiries, saveInquiries, getBanners, saveBanners,
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
-  getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents, getClubs, saveClubs, getProvisionalClubs, saveProvisionalClubs,
+  getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents,
+  getClubs, saveClubs, getClubLogo, getClubImages,
+  getProvisionalClubs, saveProvisionalClubs, getProvisionalClubLogo, getProvisionalClubImages,
   getActivityCertFile, saveActivityCertFile, getClubCertFile, saveClubCertFile,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment, saveNoticeImages, getNoticeImages,
@@ -312,7 +314,13 @@ function AboutTab() {
 /* ══════════ 탭: 동아리 소개 ══════════ */
 const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', websites: [], logoUrl: '', imageUrl: '', imageUrls: [] });
 
-function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Promise<ClubData[]>; saveList: (v: ClubData[]) => void; label: string }) {
+function ClubListPanel({ getList, saveList: saveFn, label, getLogo, getImages }: {
+  getList: () => Promise<ClubData[]>;
+  saveList: (v: ClubData[]) => void;
+  label: string;
+  getLogo: (id: number) => Promise<string>;
+  getImages: (id: number) => Promise<string[]>;
+}) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
   const [form, setForm] = useState(emptyClub());
   const [editId, setEditId] = useState<number | null>(null);
@@ -321,8 +329,13 @@ function ClubListPanel({ getList, saveList: saveFn, label }: { getList: () => Pr
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { getList().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
-  const startEdit = (c: ClubData) => {
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', websites: c.websites?.length ? c.websites : [], logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '', imageUrls: c.imageUrls || [] });
+  const startEdit = async (c: ClubData) => {
+    // 저장된 로고/이미지를 별도 키에서 불러오기
+    const [logo, imgs] = await Promise.all([
+      c.logoUrl?.startsWith('__stored_') ? getLogo(c.id) : Promise.resolve(c.logoUrl ?? ''),
+      getImages(c.id),
+    ]);
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', websites: c.websites?.length ? c.websites : [], logoUrl: logo, imageUrl: c.imageUrl || '', imageUrls: imgs });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -453,11 +466,13 @@ function ClubsTab() {
       <SubNav<Sub> options={[['central','중앙동아리'], ['provisional','가동아리'], ['location','동아리방 위치']]} value={sub} onChange={setSub} />
 
       {sub === 'central' && (
-        <ClubListPanel getList={getClubs} saveList={(v) => saveClubs(v)} label="중앙동아리" />
+        <ClubListPanel getList={getClubs} saveList={(v) => saveClubs(v)} label="중앙동아리"
+          getLogo={getClubLogo} getImages={getClubImages} />
       )}
 
       {sub === 'provisional' && (
-        <ClubListPanel getList={getProvisionalClubs} saveList={(v) => saveProvisionalClubs(v)} label="가동아리" />
+        <ClubListPanel getList={getProvisionalClubs} saveList={(v) => saveProvisionalClubs(v)} label="가동아리"
+          getLogo={getProvisionalClubLogo} getImages={getProvisionalClubImages} />
       )}
 
       {sub === 'location' && content && (
