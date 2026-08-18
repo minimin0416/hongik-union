@@ -1206,6 +1206,9 @@ function ImagesTab() {
   const [items, setItems] = useState<BannerItem[]>([{ title: '', subtitle: '', img: '' }]);
   const [logo, setLogo] = useState('');
   const [heroLogo, setHeroLogo] = useState('');
+  const [titleColor, setTitleColor] = useState('#111827');
+  const [subColor, setSubColor] = useState('#374151');
+  const [colorSaved, setColorSaved] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -1217,10 +1220,18 @@ function ImagesTab() {
         subtitle: slides[i]?.subtitle || '',
         img: imgs[i] || '',
       })));
+      if (c.heroBannerTitleColor) setTitleColor(c.heroBannerTitleColor);
+      if (c.heroBannerSubColor) setSubColor(c.heroBannerSubColor);
     });
     getLogo().then(setLogo);
     getHeroLogo().then(setHeroLogo);
   }, []);
+
+  const saveColors = async () => {
+    const c = await getSiteContent();
+    await saveSiteContent({ ...c, heroBannerTitleColor: titleColor, heroBannerSubColor: subColor });
+    setColorSaved(true); setTimeout(() => setColorSaved(false), 2000);
+  };
 
   const update = (idx: number, patch: Partial<BannerItem>) =>
     setItems(prev => prev.map((item, i) => i === idx ? { ...item, ...patch } : item));
@@ -1394,7 +1405,7 @@ function ImagesTab() {
       </div>
 
       {/* 배너 로고 */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
         <h3 className="font-semibold text-gray-700 mb-1">배너 로고 (학생회 로고)</h3>
         <p className="text-xs text-gray-400 mb-4">메인 화면 배너 중앙에 표시됩니다 · 권장: PNG 투명 배경 · 가로 400px 이상</p>
         <div className="flex items-center gap-4">
@@ -1415,6 +1426,84 @@ function ImagesTab() {
                 삭제
               </button>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* 배너 글씨 색상 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-gray-700">배너 글씨 색상</h3>
+            <p className="text-xs text-gray-400 mt-0.5">메인 화면 배너의 제목과 부제목 색상을 설정합니다</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {colorSaved && <span className="text-xs text-green-600 font-medium">✓ 저장됨</span>}
+            <button onClick={saveColors}
+              className="px-3 py-1.5 text-sm rounded-lg font-medium text-white transition-colors"
+              style={{ background: '#7C5CBF' }}>
+              저장
+            </button>
+          </div>
+        </div>
+
+        {/* 미리보기 */}
+        <div className="rounded-xl overflow-hidden mb-5 border border-gray-200"
+          style={{ background: 'linear-gradient(135deg, #2D1B6E 0%, #5B3FA8 50%, #8B6BC9 100%)', padding: '28px 24px', textAlign: 'center' }}>
+          {heroLogo && (
+            <img src={heroLogo} alt="로고 미리보기"
+              style={{ maxHeight: '64px', maxWidth: '180px', objectFit: 'contain', filter: 'brightness(0) invert(1)', margin: '0 auto 10px', display: 'block' }} />
+          )}
+          <div style={{ fontSize: '22px', fontWeight: 900, color: titleColor, textShadow: '0 1px 8px rgba(255,255,255,0.4)', marginBottom: '6px' }}>
+            홍익대학교 총동아리연합회
+          </div>
+          <div style={{ fontSize: '14px', color: subColor, textShadow: '0 1px 6px rgba(255,255,255,0.4)' }}>
+            우리 모두가 함께 만들어가는 동아리 문화
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {/* 제목 색상 */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">제목 색상</label>
+            <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl bg-gray-50">
+              <input type="color" value={titleColor} onChange={e => setTitleColor(e.target.value)}
+                className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer flex-shrink-0"
+                style={{ padding: '2px' }} />
+              <div>
+                <div className="text-sm font-mono text-gray-800">{titleColor}</div>
+                <div className="text-xs text-gray-400">제목 텍스트</div>
+              </div>
+            </div>
+            {/* 빠른 선택 */}
+            <div className="flex gap-1.5 flex-wrap">
+              {['#111827','#ffffff','#FFF8E1','#E8F5E9','#E3F2FD','#F3E5F5'].map(c => (
+                <button key={c} onClick={() => setTitleColor(c)} title={c}
+                  className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
+                  style={{ background: c, borderColor: titleColor === c ? '#7C5CBF' : '#d1d5db' }} />
+              ))}
+            </div>
+          </div>
+
+          {/* 부제목 색상 */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">부제목 색상</label>
+            <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl bg-gray-50">
+              <input type="color" value={subColor} onChange={e => setSubColor(e.target.value)}
+                className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer flex-shrink-0"
+                style={{ padding: '2px' }} />
+              <div>
+                <div className="text-sm font-mono text-gray-800">{subColor}</div>
+                <div className="text-xs text-gray-400">부제목 텍스트</div>
+              </div>
+            </div>
+            <div className="flex gap-1.5 flex-wrap">
+              {['#374151','#ffffff','#FFF8E1','#E8F5E9','#E3F2FD','#F3E5F5'].map(c => (
+                <button key={c} onClick={() => setSubColor(c)} title={c}
+                  className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
+                  style={{ background: c, borderColor: subColor === c ? '#7C5CBF' : '#d1d5db' }} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

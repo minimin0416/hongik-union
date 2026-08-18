@@ -189,6 +189,14 @@ export default function HomePage() {
     const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
     return c.mainIntroText ?? '';
   });
+  const [heroBannerTitleColor, setHeroBannerTitleColor] = useState(() => {
+    const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
+    return c.heroBannerTitleColor ?? '#111827';
+  });
+  const [heroBannerSubColor, setHeroBannerSubColor] = useState(() => {
+    const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
+    return c.heroBannerSubColor ?? '#374151';
+  });
   const [minutes, setMinutes] = useState<Minutes[]>(() => syncGet('hn_minutes', []));
   const [clubBuildings, setClubBuildings] = useState<ClubBuilding[]>(() => {
     const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
@@ -212,6 +220,8 @@ export default function HomePage() {
         setMainIntroEnabled(c.mainIntroEnabled ?? false);
         setMainIntroText(c.mainIntroText ?? '');
         setClubBuildings(c.clubBuildings ?? []);
+        if (c.heroBannerTitleColor) setHeroBannerTitleColor(c.heroBannerTitleColor);
+        if (c.heroBannerSubColor) setHeroBannerSubColor(c.heroBannerSubColor);
       }),
       getBanners().then(setBannerImgs),
       getLocationImage().then(setLocationImg),
@@ -282,13 +292,13 @@ export default function HomePage() {
             )}
             {currentSlideData && currentSlideData.title && (
               <h1 className="hero-title font-black leading-tight w-full text-center px-4"
-                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)', color: '#111827', textShadow: '0 1px 8px rgba(255,255,255,0.4)' }}>
+                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)', color: heroBannerTitleColor, textShadow: '0 1px 8px rgba(255,255,255,0.4)' }}>
                 {currentSlideData.title}
               </h1>
             )}
             {currentSlideData && currentSlideData.subtitle && (
               <p className="hero-sub text-base md:text-xl max-w-2xl"
-                style={{ color: '#374151', textShadow: '0 1px 6px rgba(255,255,255,0.4)' }}>
+                style={{ color: heroBannerSubColor, textShadow: '0 1px 6px rgba(255,255,255,0.4)' }}>
                 {currentSlideData.subtitle}
               </p>
             )}

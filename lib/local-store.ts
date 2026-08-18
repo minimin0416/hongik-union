@@ -80,6 +80,8 @@ export type SiteContent = {
   topBannerText?: string;
   mainIntroEnabled?: boolean;
   mainIntroText?: string;
+  heroBannerTitleColor?: string;
+  heroBannerSubColor?: string;
 };
 
 /* ── 기본값 ── */
