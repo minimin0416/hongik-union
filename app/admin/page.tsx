@@ -1200,19 +1200,49 @@ function ContactTab() {
 }
 
 /* ══════════ 탭: 이미지 ══════════ */
+type BannerItem = { title: string; subtitle: string; img: string };
+
 function ImagesTab() {
-  const [banners, setBanners] = useState(['', '', '']);
+  const [items, setItems] = useState<BannerItem[]>([{ title: '', subtitle: '', img: '' }]);
   const [logo, setLogo] = useState('');
+  const [saved, setSaved] = useState(false);
+
   useEffect(() => {
-    getBanners().then(setBanners);
+    Promise.all([getSiteContent(), getBanners()]).then(([c, imgs]) => {
+      const slides = c.bannerSlides || [];
+      const len = Math.max(slides.length, imgs.filter(Boolean).length, 1);
+      setItems(Array.from({ length: len }, (_, i) => ({
+        title: slides[i]?.title || '',
+        subtitle: slides[i]?.subtitle || '',
+        img: imgs[i] || '',
+      })));
+    });
     getLogo().then(setLogo);
   }, []);
-  const handleBanner = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
+
+  const update = (idx: number, patch: Partial<BannerItem>) =>
+    setItems(prev => prev.map((item, i) => i === idx ? { ...item, ...patch } : item));
+
+  const addBanner = () => setItems(prev => [...prev, { title: '', subtitle: '', img: '' }]);
+
+  const deleteBanner = (idx: number) =>
+    setItems(prev => { const n = prev.filter((_, i) => i !== idx); return n.length ? n : [{ title: '', subtitle: '', img: '' }]; });
+
+  const handleImg = async (idx: number, file: File) => {
     const url = await compressImage(file, 1920, 0.85);
-    const u = [...banners]; u[idx] = url; setBanners(u); saveBanners(u);
+    update(idx, { img: url });
   };
-  const removeBanner = (idx: number) => { const u = [...banners]; u[idx] = ''; setBanners(u); saveBanners(u); };
+
+  const save = async () => {
+    const slides = items.map(({ title, subtitle }) => ({ title, subtitle }));
+    const imgs = items.map(({ img }) => img);
+    await Promise.all([
+      getSiteContent().then(c => saveSiteContent({ ...c, bannerSlides: slides })),
+      saveBanners(imgs),
+    ]);
+    setSaved(true); setTimeout(() => setSaved(false), 2000);
+  };
+
   const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     const reader = new FileReader();
@@ -1229,8 +1259,7 @@ function ImagesTab() {
         ctx.clearRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
         const url = canvas.toDataURL('image/png');
-        setLogo(url);
-        saveLogo(url);
+        setLogo(url); saveLogo(url);
       };
       img.src = ev.target?.result as string;
     };
@@ -1240,32 +1269,80 @@ function ImagesTab() {
   return (
     <div>
       <h2 className="text-lg font-bold text-gray-800 mb-5">이미지 관리</h2>
+
+      {/* 메인 배너 — 이미지 + 텍스트 통합 */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
-        <h3 className="font-semibold text-gray-700 mb-1">메인 배너 이미지</h3>
-        <p className="text-xs text-gray-400 mb-4">권장: 1200×400px 이상 JPG/PNG · 최대 5MB</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {banners.map((b, i) => (
-            <div key={i} className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden" style={{ minHeight: '120px' }}>
-              {b ? (
-                <div className="relative">
-                  <img src={b} alt="" className="w-full h-28 object-cover" />
-                  <div className="absolute top-1.5 right-1.5 flex gap-1">
-                    <label className="bg-white/90 text-gray-700 text-xs px-2 py-1 rounded cursor-pointer">교체<input type="file" accept="image/*" className="hidden" onChange={(e) => handleBanner(i, e)} /></label>
-                    <button onClick={() => removeBanner(i)} className="bg-red-500 text-white text-xs px-2 py-1 rounded">삭제</button>
-                  </div>
-                  <div className="absolute bottom-0 inset-x-0 bg-black/40 text-white text-xs py-1 text-center">배너 {i + 1}</div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-gray-700">메인 배너</h3>
+            <p className="text-xs text-gray-400 mt-0.5">배너 이미지와 텍스트를 함께 관리 · 권장 이미지: 1200×400px 이상</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <SavedBadge show={saved} />
+            <button onClick={addBanner}
+              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-200 font-medium">
+              + 배너 추가
+            </button>
+            <Btn onClick={save}>저장</Btn>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {items.map((item, i) => (
+            <div key={i} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">배너 {i + 1}</span>
+                <button onClick={() => deleteBanner(i)}
+                  className="text-xs text-red-400 hover:text-red-600 hover:underline">
+                  배너 삭제
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 이미지 */}
+                <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden" style={{ minHeight: '120px' }}>
+                  {item.img ? (
+                    <div className="relative">
+                      <img src={item.img} alt="" className="w-full h-32 object-cover" />
+                      <div className="absolute top-1.5 right-1.5 flex gap-1">
+                        <label className="bg-white/90 text-gray-700 text-xs px-2 py-1 rounded cursor-pointer shadow-sm">
+                          교체
+                          <input type="file" accept="image/*" className="hidden"
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImg(i, f); }} />
+                        </label>
+                        <button onClick={() => update(i, { img: '' })}
+                          className="bg-red-500 text-white text-xs px-2 py-1 rounded shadow-sm">삭제</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-32 cursor-pointer hover:bg-gray-100 transition-colors">
+                      <span className="text-3xl mb-1 text-gray-300">+</span>
+                      <span className="text-xs text-gray-400">이미지 추가</span>
+                      <input type="file" accept="image/*" className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImg(i, f); }} />
+                    </label>
+                  )}
                 </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center h-28 cursor-pointer hover:bg-gray-50">
-                  <span className="text-2xl mb-1">+</span>
-                  <span className="text-xs text-gray-400">배너 {i + 1}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleBanner(i, e)} />
-                </label>
-              )}
+
+                {/* 텍스트 */}
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">제목</label>
+                    <input value={item.title} onChange={(e) => update(i, { title: e.target.value })}
+                      className={inputCls + ' mt-0.5'} placeholder="배너 제목" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium">부제목</label>
+                    <input value={item.subtitle} onChange={(e) => update(i, { subtitle: e.target.value })}
+                      className={inputCls + ' mt-0.5'} placeholder="배너 부제목 (선택)" />
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* 로고 */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h3 className="font-semibold text-gray-700 mb-1">로고</h3>
         <p className="text-xs text-gray-400 mb-4">권장: PNG · 가로 200px 이상</p>
@@ -1375,25 +1452,6 @@ function SettingsTab() {
             className={inputCls + ' resize-none'} placeholder="홍익대학교 총동아리연합회에 오신 것을 환영합니다..." />
           <p className="text-xs text-gray-400 mt-1">메인 히어로 배너 아래에 표시됩니다. 줄바꿈 적용됩니다.</p>
         </Field>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-        <h3 className="font-semibold text-gray-700 border-b border-gray-100 pb-3 mb-4">메인 배너 텍스트</h3>
-        {content.bannerSlides.map((s, i) => (
-          <div key={i} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs font-bold text-gray-400 mb-2">배너 {i + 1}</p>
-            <div className="space-y-2">
-              <div>
-                <label className="text-xs text-gray-500">제목</label>
-                <input value={s.title} onChange={(e) => { const a = [...content.bannerSlides]; a[i] = { ...a[i], title: e.target.value }; setContent({ ...content, bannerSlides: a }); }} className={inputCls + ' mt-0.5'} />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500">부제목</label>
-                <input value={s.subtitle} onChange={(e) => { const a = [...content.bannerSlides]; a[i] = { ...a[i], subtitle: e.target.value }; setContent({ ...content, bannerSlides: a }); }} className={inputCls + ' mt-0.5'} />
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4 space-y-4">
