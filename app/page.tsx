@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, getClubMapImage, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
+import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, getClubMapImage, getLogo, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
 import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -180,6 +180,7 @@ export default function HomePage() {
     return c.clubBuildings ?? [];
   });
   const [clubMapImage, setClubMapImage] = useState(() => syncGetStr('hn_club_map_image'));
+  const [heroLogoUrl, setHeroLogoUrl] = useState(() => syncGetStr('hn_logo'));
 
   // 로더 상태
   const startTimeRef = useRef(Date.now());
@@ -202,6 +203,7 @@ export default function HomePage() {
       getCalendarEvents().then(setCalEvents),
       getMinutes().then(setMinutes),
       getClubMapImage().then(setClubMapImage),
+      getLogo().then(v => { if (v) setHeroLogoUrl(v); }),
     ]).then(() => {
       setReady(true);
       if (!hasCache) {
@@ -248,22 +250,38 @@ export default function HomePage() {
           {/* 그라디언트 오버레이 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
-          {/* 슬라이드 텍스트 — key로 재애니메이션 */}
-          {currentSlideData && (currentSlideData.title || currentSlideData.subtitle) && (
-            <div key={`text-${currentSlide}`}
-              className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6 gap-3 pointer-events-none">
-              {currentSlideData.title && (
-                <h1 className="hero-title text-3xl md:text-5xl lg:text-6xl font-black drop-shadow-lg leading-tight max-w-3xl">
-                  {currentSlideData.title}
-                </h1>
-              )}
-              {currentSlideData.subtitle && (
-                <p className="hero-sub text-base md:text-xl text-white/85 drop-shadow max-w-2xl">
-                  {currentSlideData.subtitle}
-                </p>
-              )}
-            </div>
-          )}
+          {/* 히어로 중앙 — 로고 있으면 로고, 없으면 텍스트 */}
+          <div key={`text-${currentSlide}`}
+            className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6 gap-4 pointer-events-none">
+            {heroLogoUrl ? (
+              <img
+                src={heroLogoUrl}
+                alt="로고"
+                className="hero-title"
+                style={{
+                  maxHeight: 'clamp(80px, 18vw, 200px)',
+                  maxWidth: 'clamp(200px, 50vw, 600px)',
+                  objectFit: 'contain',
+                  filter: 'brightness(0) invert(1) drop-shadow(0 4px 24px rgba(0,0,0,0.4))',
+                }}
+              />
+            ) : (
+              currentSlideData && (currentSlideData.title || currentSlideData.subtitle) && (
+                <>
+                  {currentSlideData.title && (
+                    <h1 className="hero-title text-3xl md:text-5xl lg:text-6xl font-black drop-shadow-lg leading-tight max-w-3xl">
+                      {currentSlideData.title}
+                    </h1>
+                  )}
+                  {currentSlideData.subtitle && (
+                    <p className="hero-sub text-base md:text-xl text-white/85 drop-shadow max-w-2xl">
+                      {currentSlideData.subtitle}
+                    </p>
+                  )}
+                </>
+              )
+            )}
+          </div>
 
           {/* 이전/다음 버튼 — 모던 원형 */}
           <button onClick={() => setCurrentSlide((p) => (p - 1 + slideCount) % slideCount)}
