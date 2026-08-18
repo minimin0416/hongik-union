@@ -19,19 +19,23 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-gray-700 text-gray-300 py-8 mt-4">
+    <footer className="py-8 mt-4" style={{ background: '#C9BDE8', color: '#111827' }}>
       <div className="w-full px-8 lg:px-14 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <p className="text-base font-semibold text-white">{title}</p>
-          <p className="text-sm mt-1">위치: {address} · 이메일: {email}</p>
-          <p className="text-sm mt-0.5">{copyright}</p>
+          <p className="text-base font-semibold" style={{ color: '#1a1a2e' }}>{title}</p>
+          <p className="text-sm mt-1" style={{ color: '#2D1B6E' }}>위치: {address} · 이메일: {email}</p>
+          <p className="text-sm mt-0.5" style={{ color: '#3a3a5c' }}>{copyright}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <Link href="/admin" className="text-sm text-gray-400 hover:text-white transition-colors">
+          <Link href="/admin" className="text-sm transition-colors" style={{ color: '#5A3FA3' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#2D1B6E')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#5A3FA3')}>
             관리자 페이지
           </Link>
           <a href="https://www.hongik.ac.kr/kr/etc/privacy-policy.do" target="_blank" rel="noopener noreferrer"
-            className="text-sm text-gray-300 hover:text-white underline underline-offset-2 inline-block transition-colors">
+            className="text-sm underline underline-offset-2 inline-block transition-colors" style={{ color: '#5A3FA3' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#2D1B6E')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#5A3FA3')}>
             개인정보 처리방침
           </a>
         </div>
