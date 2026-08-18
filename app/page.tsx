@@ -143,10 +143,16 @@ function SimpleCalendar({ events }: { events: CalendarEvent[] }) {
                     const isStart = ev.startDate === dateStr;
                     const isEnd = ev.endDate === dateStr;
                     const isSingle = isStart && isEnd;
+                    const barCls = isSingle
+                      ? 'rounded px-1'
+                      : isStart
+                        ? 'rounded-l pl-1 -mr-2'
+                        : isEnd
+                          ? 'rounded-r pr-1 -ml-2'
+                          : '-mx-2';
                     return (
                       <div key={ev.id} style={{ backgroundColor: ev.color || '#3B82F6' }}
-                        className={`text-white text-[9px] leading-3.5 px-1 py-0.5 overflow-hidden
-                          ${isSingle ? 'rounded' : isStart ? 'rounded-l' : isEnd ? 'rounded-r' : ''}`}>
+                        className={`text-white text-[9px] leading-3.5 py-0.5 overflow-visible ${barCls}`}>
                         {isStart && <span className="truncate block">{ev.title}</span>}
                         {!isStart && <span className="invisible text-[9px]">.</span>}
                       </div>

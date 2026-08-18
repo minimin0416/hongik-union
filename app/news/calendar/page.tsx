@@ -91,11 +91,17 @@ export default function CalendarPage() {
                       const isStart = ev.startDate === dateStr;
                       const isEnd = ev.endDate === dateStr;
                       const isSingle = isStart && isEnd;
+                      const barCls = isSingle
+                        ? 'rounded px-1.5'
+                        : isStart
+                          ? 'rounded-l pl-1.5 -mr-2'
+                          : isEnd
+                            ? 'rounded-r pr-1.5 -ml-2'
+                            : '-mx-2';
                       return (
                         <div key={ev.id}
                           style={{ backgroundColor: ev.color || '#3B82F6' }}
-                          className={`text-white text-[10px] leading-4 px-1 overflow-hidden
-                            ${isSingle ? 'rounded' : isStart ? 'rounded-l pl-1.5' : isEnd ? 'rounded-r' : ''}`}>
+                          className={`text-white text-[10px] leading-4 overflow-visible ${barCls}`}>
                           {isStart && <span className="truncate block">{ev.title}</span>}
                           {!isStart && <span className="invisible text-[10px]">.</span>}
                         </div>
