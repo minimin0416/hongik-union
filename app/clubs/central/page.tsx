@@ -60,7 +60,7 @@ function ClubsContent() {
               <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-gray-400 transition-all cursor-pointer h-full">
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {club.logoUrl && !club.logoUrl.startsWith('__stored_')
+                    {club.logoUrl
                       ? <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
                       : <span className="text-gray-600 font-bold text-sm">{club.name.slice(0, 2)}</span>
                     }

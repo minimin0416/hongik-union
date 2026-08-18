@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getProvisionalClubs, getProvisionalClubLogo, getProvisionalClubImages, type ClubData } from '@/lib/local-store';
+import { getProvisionalClubs, getProvisionalClubImages, type ClubData } from '@/lib/local-store';
 
 function snsInfo(url: string): { label: string; icon: string; color: string } {
   if (url.includes('instagram')) return { label: '인스타그램', icon: '📷', color: 'bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200' };
@@ -43,11 +43,8 @@ export default function ProvisionalClubDetailPage() {
       const found = clubs.find((c) => c.id === Number(params.id));
       if (!found) { setNotFound(true); return; }
       const id = found.id;
-      const [logo, imgs] = await Promise.all([
-        found.logoUrl?.startsWith('__stored_') ? getProvisionalClubLogo(id) : Promise.resolve(found.logoUrl ?? ''),
-        getProvisionalClubImages(id),
-      ]);
-      setClub({ ...found, logoUrl: logo, imageUrls: imgs.length ? imgs : (found.imageUrls ?? []) });
+      const imgs = await getProvisionalClubImages(id);
+      setClub({ ...found, imageUrls: imgs.length ? imgs : (found.imageUrls ?? []) });
     });
   }, [params.id]);
 

@@ -9,8 +9,8 @@ import {
   getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents,
-  getClubs, saveClubs, getClubLogo, getClubImages,
-  getProvisionalClubs, saveProvisionalClubs, getProvisionalClubLogo, getProvisionalClubImages,
+  getClubs, saveClubs, getClubImages,
+  getProvisionalClubs, saveProvisionalClubs, getProvisionalClubImages,
   getActivityCertFile, saveActivityCertFile, getClubCertFile, saveClubCertFile,
   getSiteContent, saveSiteContent,
   readFileAsBase64, downloadFile, saveNoticeAttachment, getNoticeAttachment, saveNoticeImages, getNoticeImages,
@@ -83,10 +83,10 @@ function FileInput({ onUpload, current }: { onUpload: (a: Attachment) => void; c
   );
 }
 
-function ImageInput({ onUpload, current, onRemove, maxW = 1200 }: { onUpload: (url: string) => void; current?: string; onRemove: () => void; maxW?: number }) {
+function ImageInput({ onUpload, current, onRemove, maxW = 1200, quality = 0.85 }: { onUpload: (url: string) => void; current?: string; onRemove: () => void; maxW?: number; quality?: number }) {
   const handle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const url = await compressImage(file, maxW, 0.85); onUpload(url);
+    const url = await compressImage(file, maxW, quality); onUpload(url);
   };
   return (
     <div>
@@ -314,11 +314,10 @@ function AboutTab() {
 /* ══════════ 탭: 동아리 소개 ══════════ */
 const emptyClub = (): Omit<ClubData, 'id'> => ({ name: '', category: '공연분과', room: '', president: '', recruitPeriod: '', meetingSchedule: '', intro: '', desc: '', activities: [''], targets: [''], website: '', websites: [], logoUrl: '', imageUrl: '', imageUrls: [] });
 
-function ClubListPanel({ getList, saveList: saveFn, label, getLogo, getImages }: {
+function ClubListPanel({ getList, saveList: saveFn, label, getImages }: {
   getList: () => Promise<ClubData[]>;
   saveList: (v: ClubData[]) => void;
   label: string;
-  getLogo: (id: number) => Promise<string>;
   getImages: (id: number) => Promise<string[]>;
 }) {
   const [clubs, setClubs] = useState<ClubData[]>([]);
@@ -330,12 +329,8 @@ function ClubListPanel({ getList, saveList: saveFn, label, getLogo, getImages }:
   useEffect(() => { getList().then(setClubs); }, []);
   const save = (v: ClubData[]) => { setClubs(v); saveFn(v); };
   const startEdit = async (c: ClubData) => {
-    // 저장된 로고/이미지를 별도 키에서 불러오기
-    const [logo, imgs] = await Promise.all([
-      c.logoUrl?.startsWith('__stored_') ? getLogo(c.id) : Promise.resolve(c.logoUrl ?? ''),
-      getImages(c.id),
-    ]);
-    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', websites: c.websites?.length ? c.websites : [], logoUrl: logo, imageUrl: c.imageUrl || '', imageUrls: imgs });
+    const imgs = await getImages(c.id);
+    setForm({ name: c.name, category: c.category, room: c.room, president: c.president, recruitPeriod: c.recruitPeriod, meetingSchedule: c.meetingSchedule, intro: c.intro, desc: c.desc, activities: c.activities.length ? c.activities : [''], targets: c.targets.length ? c.targets : [''], website: c.website || '', websites: c.websites?.length ? c.websites : [], logoUrl: c.logoUrl || '', imageUrl: c.imageUrl || '', imageUrls: imgs });
     setEditId(c.id); setShow(true); setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
   const submit = (e: React.FormEvent) => {
@@ -406,8 +401,8 @@ function ClubListPanel({ getList, saveList: saveFn, label, getLogo, getImages }:
             <DynList label="활동 내용" values={form.activities} onChange={(v) => setForm({ ...form, activities: v })} />
             <DynList label="이런 분을 환영해요" values={form.targets} onChange={(v) => setForm({ ...form, targets: v })} />
             <Field label="동아리 로고">
-              <ImageInput current={form.logoUrl} onUpload={(url) => setForm({ ...form, logoUrl: url })} onRemove={() => setForm({ ...form, logoUrl: '' })} />
-              <p className="text-xs text-gray-400 mt-1">카드 목록에 표시될 로고 (정사각형 이미지 권장)</p>
+              <ImageInput current={form.logoUrl} onUpload={(url) => setForm({ ...form, logoUrl: url })} onRemove={() => setForm({ ...form, logoUrl: '' })} maxW={240} quality={0.65} />
+              <p className="text-xs text-gray-400 mt-1">카드 목록에 표시될 로고 (정사각형 이미지 권장, 자동 압축 저장됩니다)</p>
             </Field>
             <Field label="활동 사진 (여러 장)">
               <div className="space-y-2">
@@ -467,12 +462,12 @@ function ClubsTab() {
 
       {sub === 'central' && (
         <ClubListPanel getList={getClubs} saveList={(v) => saveClubs(v)} label="중앙동아리"
-          getLogo={getClubLogo} getImages={getClubImages} />
+          getImages={getClubImages} />
       )}
 
       {sub === 'provisional' && (
         <ClubListPanel getList={getProvisionalClubs} saveList={(v) => saveProvisionalClubs(v)} label="가동아리"
-          getLogo={getProvisionalClubLogo} getImages={getProvisionalClubImages} />
+          getImages={getProvisionalClubImages} />
       )}
 
       {sub === 'location' && content && (
