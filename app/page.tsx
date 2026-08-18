@@ -250,36 +250,31 @@ export default function HomePage() {
           {/* 그라디언트 오버레이 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
-          {/* 히어로 중앙 — 로고 있으면 로고, 없으면 텍스트 */}
+          {/* 히어로 중앙 — 로고 + 텍스트 함께 */}
           <div key={`text-${currentSlide}`}
             className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6 gap-4 pointer-events-none">
-            {heroLogoUrl ? (
+            {heroLogoUrl && (
               <img
                 src={heroLogoUrl}
                 alt="로고"
-                className="hero-title"
+                className="hero-badge"
                 style={{
-                  maxHeight: 'clamp(80px, 18vw, 200px)',
-                  maxWidth: 'clamp(200px, 50vw, 600px)',
+                  maxHeight: 'clamp(60px, 14vw, 160px)',
+                  maxWidth: 'clamp(160px, 42vw, 500px)',
                   objectFit: 'contain',
                   filter: 'brightness(0) invert(1) drop-shadow(0 4px 24px rgba(0,0,0,0.4))',
                 }}
               />
-            ) : (
-              currentSlideData && (currentSlideData.title || currentSlideData.subtitle) && (
-                <>
-                  {currentSlideData.title && (
-                    <h1 className="hero-title text-3xl md:text-5xl lg:text-6xl font-black drop-shadow-lg leading-tight max-w-3xl">
-                      {currentSlideData.title}
-                    </h1>
-                  )}
-                  {currentSlideData.subtitle && (
-                    <p className="hero-sub text-base md:text-xl text-white/85 drop-shadow max-w-2xl">
-                      {currentSlideData.subtitle}
-                    </p>
-                  )}
-                </>
-              )
+            )}
+            {currentSlideData && currentSlideData.title && (
+              <h1 className="hero-title text-3xl md:text-5xl lg:text-6xl font-black drop-shadow-lg leading-tight max-w-3xl">
+                {currentSlideData.title}
+              </h1>
+            )}
+            {currentSlideData && currentSlideData.subtitle && (
+              <p className="hero-sub text-base md:text-xl text-white/85 drop-shadow max-w-2xl">
+                {currentSlideData.subtitle}
+              </p>
             )}
           </div>
 
