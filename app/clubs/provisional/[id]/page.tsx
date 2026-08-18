@@ -82,7 +82,7 @@ export default function ProvisionalClubDetailPage() {
             <h1 className="text-2xl font-bold text-gray-900 mt-2">{club.name}</h1>
             {club.desc && <p className="text-gray-500 text-sm mt-1">{club.desc}</p>}
           </div>
-          {club.logoUrl && (
+          {club.logoUrl && !club.logoUrl.startsWith('__stored_') && (
             <img src={club.logoUrl} alt={`${club.name} 로고`} className="w-20 h-20 rounded-xl object-contain border border-gray-100 flex-shrink-0" />
           )}
         </div>

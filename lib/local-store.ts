@@ -160,16 +160,21 @@ export const defaultContent: SiteContent = { // exported for sync init
 };
 
 /* ── DB 헬퍼 (캐시 우선 + 백그라운드 갱신) ── */
+
+// dbSet으로 쓴 키는 Redis 저장 확인 전까지 백그라운드 동기화가 덮어쓰지 못하게 보호
+const locallyWritten = new Set<string>();
+
 async function dbGet<T>(key: string, def: T): Promise<T> {
   if (typeof window === 'undefined') return def;
   const cached = localStorage.getItem(key);
   if (cached) {
-    // 캐시 즉시 반환 + 백그라운드에서 최신 데이터로 갱신
+    // 캐시 즉시 반환 + 백그라운드 갱신 (단, 로컬에서 쓴 키는 덮어쓰지 않음)
     fetch(`/api/data?key=${encodeURIComponent(key)}`)
       .then(r => r.json())
       .then(v => {
+        if (locallyWritten.has(key)) return; // 로컬 변경 보호
         if (v !== null) localStorage.setItem(key, v);
-        else localStorage.removeItem(key); // 초기화 후 다른 기기 캐시도 삭제
+        else localStorage.removeItem(key);
       })
       .catch(() => {});
     return JSON.parse(cached) as T;
@@ -184,7 +189,7 @@ async function dbGet<T>(key: string, def: T): Promise<T> {
 
 function emitSyncError(key: string, detail?: string) {
   if (typeof window === 'undefined') return;
-  console.error('[DB] Supabase 저장 실패:', key, detail);
+  console.error('[DB] 저장 실패:', key, detail);
   window.dispatchEvent(new CustomEvent('db-sync-error', { detail: { key, detail } }));
 }
 
@@ -192,13 +197,15 @@ async function dbSet(key: string, value: unknown): Promise<void> {
   if (typeof window === 'undefined') return;
   const serialized = JSON.stringify(value);
   localStorage.setItem(key, serialized);
+  locallyWritten.add(key); // 백그라운드 덮어쓰기 방지
   try {
     const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value: serialized }),
     });
-    if (!res.ok) emitSyncError(key, `HTTP ${res.status}`);
+    if (res.ok) locallyWritten.delete(key); // Redis 확인 → 보호 해제
+    else emitSyncError(key, `HTTP ${res.status}`);
   } catch (e) {
     emitSyncError(key, String(e));
   }
@@ -208,10 +215,10 @@ async function dbGetStr(key: string): Promise<string> {
   if (typeof window === 'undefined') return '';
   const cached = localStorage.getItem(key);
   if (cached) {
-    // 백그라운드에서 최신 데이터로 갱신
     fetch(`/api/data?key=${encodeURIComponent(key)}`)
       .then(r => r.json())
       .then(v => {
+        if (locallyWritten.has(key)) return;
         if (v !== null) { localStorage.setItem(key, v); }
         else { localStorage.removeItem(key); }
         window.dispatchEvent(new CustomEvent('db-str-update', { detail: { key, value: v ?? '' } }));
@@ -230,13 +237,15 @@ async function dbGetStr(key: string): Promise<string> {
 async function dbSetStr(key: string, value: string): Promise<void> {
   if (typeof window === 'undefined') return;
   localStorage.setItem(key, value);
+  locallyWritten.add(key);
   try {
     const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value }),
     });
-    if (!res.ok) emitSyncError(key, `HTTP ${res.status}`);
+    if (res.ok) locallyWritten.delete(key);
+    else emitSyncError(key, `HTTP ${res.status}`);
   } catch (e) {
     emitSyncError(key, String(e));
   }

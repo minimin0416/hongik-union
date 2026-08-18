@@ -413,7 +413,7 @@ function ClubListPanel({ getList, saveList: saveFn, label, getImages }: {
                       <label className="cursor-pointer px-2 py-1 border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50">
                         교체<input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                           const file = e.target.files?.[0]; if (!file) return;
-                          const compressed = await compressImage(file, 1200, 0.85);
+                          const compressed = await compressImage(file, 800, 0.75);
                           const next = [...(form.imageUrls ?? [])]; next[i] = compressed;
                           setForm({ ...form, imageUrls: next });
                         }} />
@@ -427,7 +427,7 @@ function ClubListPanel({ getList, saveList: saveFn, label, getImages }: {
                   🖼️ 사진 추가
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return;
-                    const compressed = await compressImage(file, 1200, 0.85);
+                    const compressed = await compressImage(file, 800, 0.75);
                     setForm({ ...form, imageUrls: [...(form.imageUrls ?? []), compressed] });
                   }} />
                 </label>
