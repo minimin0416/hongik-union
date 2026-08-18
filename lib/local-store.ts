@@ -288,6 +288,8 @@ export const saveLogo = (v: string) => {
 };
 export const getHeroLogo = (): Promise<string> => dbGetStr('hn_hero_logo');
 export const saveHeroLogo = (v: string) => dbSetStr('hn_hero_logo', v);
+export const getSectionBanner = (): Promise<string> => dbGetStr('hn_section_banner');
+export const saveSectionBanner = (v: string) => dbSetStr('hn_section_banner', v);
 export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
 export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
 export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');

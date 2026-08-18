@@ -6,7 +6,8 @@ import {
   getClubNews, saveClubNews, getPenalties, savePenalties,
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
-  getLogo, saveLogo, getHeroLogo, saveHeroLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
+  getLogo, saveLogo, getHeroLogo, saveHeroLogo, getSectionBanner, saveSectionBanner,
+  getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents,
   getClubs, saveClubs, getClubImages,
@@ -1206,6 +1207,7 @@ function ImagesTab() {
   const [items, setItems] = useState<BannerItem[]>([{ title: '', subtitle: '', img: '' }]);
   const [logo, setLogo] = useState('');
   const [heroLogo, setHeroLogo] = useState('');
+  const [sectionBanner, setSectionBanner] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
   const [subColor, setSubColor] = useState('#374151');
   const [colorSaved, setColorSaved] = useState(false);
@@ -1225,6 +1227,7 @@ function ImagesTab() {
     });
     getLogo().then(setLogo);
     getHeroLogo().then(setHeroLogo);
+    getSectionBanner().then(setSectionBanner);
   }, []);
 
   const saveColors = async () => {
@@ -1302,6 +1305,12 @@ function ImagesTab() {
     reader.readAsDataURL(file);
   };
 
+  const handleSectionBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const url = await compressImage(file, 1920, 0.85);
+    setSectionBanner(url); saveSectionBanner(url);
+  };
+
   return (
     <div>
       <h2 className="text-lg font-bold text-gray-800 mb-5">이미지 관리</h2>
@@ -1375,6 +1384,33 @@ function ImagesTab() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 서브페이지 배너 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
+        <h3 className="font-semibold text-gray-700 mb-1">서브페이지 배너 이미지</h3>
+        <p className="text-xs text-gray-400 mb-4">총동아리연합회 · 동아리 소개 · 소식마당 등 모든 서브페이지 상단에 공통으로 표시됩니다 · 권장: 1920×600px 이상</p>
+        <div className="flex flex-col gap-3">
+          <div className="w-full h-28 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden flex items-center justify-center bg-gray-50">
+            {sectionBanner ? (
+              <img src={sectionBanner} alt="서브페이지 배너" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs text-gray-400">배너 이미지 없음 (보라색 그라디언트로 표시)</span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <label className="cursor-pointer px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+              {sectionBanner ? '이미지 교체' : '이미지 업로드'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleSectionBanner} />
+            </label>
+            {sectionBanner && (
+              <button onClick={() => { setSectionBanner(''); saveSectionBanner(''); }}
+                className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">
+                삭제
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
