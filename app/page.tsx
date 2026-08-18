@@ -262,7 +262,7 @@ export default function HomePage() {
                   maxHeight: 'clamp(60px, 14vw, 160px)',
                   maxWidth: 'clamp(160px, 42vw, 500px)',
                   objectFit: 'contain',
-                  filter: 'brightness(0) invert(1) drop-shadow(0 4px 24px rgba(0,0,0,0.4))',
+                  filter: 'drop-shadow(0 4px 24px rgba(0,0,0,0.3))',
                 }}
               />
             )}
