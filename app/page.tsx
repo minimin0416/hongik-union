@@ -236,8 +236,8 @@ export default function HomePage() {
             : <div className="absolute inset-0 bg-gradient-to-br from-[#2D1B6E] via-[#5B3FA8] to-[#8B6BC9]" />
           }
 
-          {/* 그라디언트 오버레이 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
+          {/* 그라디언트 오버레이 — 라벤더 톤 */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(45,27,110,0.55) 0%, rgba(91,63,168,0.30) 40%, rgba(45,27,110,0.65) 100%)' }} />
 
           {/* 슬라이드 텍스트 — key로 재애니메이션 */}
           {currentSlideData && (currentSlideData.title || currentSlideData.subtitle) && (
