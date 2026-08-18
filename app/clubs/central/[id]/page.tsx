@@ -73,10 +73,10 @@ export default function ClubDetailPage() {
         동아리 목록으로
       </Link>
 
-      {/* 기본 정보 + 활동 사진 (2열) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      {/* 기본 정보 + 소개글 (2열) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-stretch">
         {/* 기본 정보 */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
           <div className="px-7 pt-7 pb-5 border-b border-gray-100 flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <span className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium">{club.category}</span>
@@ -87,7 +87,7 @@ export default function ClubDetailPage() {
               <img src={club.logoUrl} alt={`${club.name} 로고`} className="w-24 h-24 rounded-xl object-contain border border-gray-100 flex-shrink-0" />
             )}
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 flex-1">
             {infoRows.map((r) => (
               <div key={r.label} className="flex items-start px-7 py-4">
                 <span className="w-28 text-base text-gray-500 font-medium flex-shrink-0 pt-0.5">{r.label}</span>
@@ -107,32 +107,32 @@ export default function ClubDetailPage() {
           </div>
         </div>
 
-        {/* 활동 사진 */}
-        {(() => {
-          const imgs = club.imageUrls?.length ? club.imageUrls : club.imageUrl ? [club.imageUrl] : [];
-          if (!imgs.length) return <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-base">활동 사진 없음</div>;
-          return (
-            <div className={imgs.length > 1 ? 'grid grid-cols-2 gap-2 content-start' : ''}>
-              {imgs.map((src, i) => (
-                <img key={i} src={src} alt={`${club.name} 활동사진 ${i + 1}`}
-                  className="w-full rounded-xl object-cover"
-                  style={{ maxHeight: imgs.length === 1 ? '320px' : '220px' }} />
-              ))}
-            </div>
-          );
-        })()}
+        {/* 우리 동아리를 소개할게요 */}
+        {club.intro && (
+          <div className="bg-white rounded-xl border border-gray-200 p-7 flex flex-col">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-gray-800 rounded-full inline-block"></span>
+              우리 동아리를 소개할게요
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-base whitespace-pre-line flex-1">{club.intro}</p>
+          </div>
+        )}
       </div>
 
-      {/* 동아리 소개 */}
-      {club.intro && (
-        <div className="bg-white rounded-xl border border-gray-200 p-7 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="w-1 h-6 bg-gray-800 rounded-full inline-block"></span>
-            우리 동아리를 소개할게요
-          </h2>
-          <p className="text-gray-600 leading-relaxed text-base whitespace-pre-line">{club.intro}</p>
-        </div>
-      )}
+      {/* 활동 사진 — 있을 때만, 풀 와이드 크게 */}
+      {(() => {
+        const imgs = club.imageUrls?.length ? club.imageUrls : club.imageUrl ? [club.imageUrl] : [];
+        if (!imgs.length) return null;
+        return (
+          <div className={`mb-6 ${imgs.length === 1 ? '' : imgs.length === 2 ? 'grid grid-cols-2 gap-3' : imgs.length === 3 ? 'grid grid-cols-3 gap-3' : 'grid grid-cols-2 gap-3'}`}>
+            {imgs.map((src, i) => (
+              <img key={i} src={src} alt={`${club.name} 활동사진 ${i + 1}`}
+                className="w-full rounded-xl object-cover"
+                style={{ maxHeight: imgs.length === 1 ? '480px' : '320px' }} />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* 활동 내용 + 환영 대상 (2열) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
