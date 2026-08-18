@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import SectionHeader from '@/components/SectionHeader';
 
 const links = [
   { title: '공지사항', href: '/news/notices' },
@@ -14,10 +15,7 @@ export default function NewsLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   return (
     <div>
-      <div className="section-header">
-        <h1>소식마당</h1>
-        <p>홍익대학교 총동아리연합회 소식을 확인하세요</p>
-      </div>
+      <SectionHeader title="소식마당" subtitle="홍익대학교 총동아리연합회 소식을 확인하세요" />
       <div className="sub-nav">
         <div className="sub-nav-inner">
           {links.map((l) => (

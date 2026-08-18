@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import SectionHeader from '@/components/SectionHeader';
 
 const links = [
   { title: '규칙', href: '/info/rules' },
@@ -16,10 +17,7 @@ export default function InfoLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   return (
     <div>
-      <div className="section-header">
-        <h1>정보마당</h1>
-        <p>동아리 활동에 필요한 정보와 양식을 확인하세요</p>
-      </div>
+      <SectionHeader title="정보마당" subtitle="동아리 활동에 필요한 정보와 양식을 확인하세요" />
       <div className="sub-nav">
         <div className="sub-nav-inner">
           {links.map((l) => (

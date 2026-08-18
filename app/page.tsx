@@ -8,7 +8,6 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 /* ─── 로딩 화면 ─── */
 function LoaderScreen({ exiting, logoUrl }: { exiting: boolean; logoUrl?: string }) {
-  const letters = ['U','N','I','O','N'];
   return (
     <div className={`loader-screen${exiting ? ' loader-exiting' : ''}`}>
       {/* 배경 오브 */}
@@ -24,8 +23,8 @@ function LoaderScreen({ exiting, logoUrl }: { exiting: boolean; logoUrl?: string
 
       {/* 중앙 콘텐츠 */}
       <div className="loader-center">
-        {/* 학생회 로고 or UNION 텍스트 */}
-        {logoUrl ? (
+        {/* 학생회 로고 */}
+        {logoUrl && (
           <img
             src={logoUrl}
             alt="총동아리연합회 로고"
@@ -38,12 +37,6 @@ function LoaderScreen({ exiting, logoUrl }: { exiting: boolean; logoUrl?: string
               marginBottom: '8px',
             }}
           />
-        ) : (
-          <div className="loader-union" style={{ perspective:'700px' }}>
-            {letters.map((l, i) => (
-              <span key={l} className="loader-letter" style={{ animationDelay:`${0.08 * i}s` }}>{l}</span>
-            ))}
-          </div>
         )}
 
         {/* 서브타이틀 */}
@@ -286,7 +279,6 @@ export default function HomePage() {
                   maxHeight: 'clamp(60px, 14vw, 160px)',
                   maxWidth: 'clamp(160px, 42vw, 500px)',
                   objectFit: 'contain',
-                  filter: 'drop-shadow(0 4px 24px rgba(0,0,0,0.3))',
                 }}
               />
             )}
