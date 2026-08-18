@@ -266,7 +266,8 @@ export default function HomePage() {
               />
             )}
             {currentSlideData && currentSlideData.title && (
-              <h1 className="hero-title text-3xl md:text-5xl lg:text-6xl font-black drop-shadow-lg leading-tight max-w-3xl">
+              <h1 className="hero-title font-black drop-shadow-lg leading-tight w-full text-center px-4"
+                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)' }}>
                 {currentSlideData.title}
               </h1>
             )}
