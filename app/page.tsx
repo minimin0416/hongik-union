@@ -7,7 +7,7 @@ import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
 
 /* ─── 로딩 화면 ─── */
-function LoaderScreen({ exiting }: { exiting: boolean }) {
+function LoaderScreen({ exiting, logoUrl }: { exiting: boolean; logoUrl?: string }) {
   const letters = ['U','N','I','O','N'];
   return (
     <div className={`loader-screen${exiting ? ' loader-exiting' : ''}`}>
@@ -24,12 +24,27 @@ function LoaderScreen({ exiting }: { exiting: boolean }) {
 
       {/* 중앙 콘텐츠 */}
       <div className="loader-center">
-        {/* UNION 글자 하나씩 */}
-        <div className="loader-union" style={{ perspective:'700px' }}>
-          {letters.map((l, i) => (
-            <span key={l} className="loader-letter" style={{ animationDelay:`${0.08 * i}s` }}>{l}</span>
-          ))}
-        </div>
+        {/* 학생회 로고 or UNION 텍스트 */}
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt="총동아리연합회 로고"
+            style={{
+              maxHeight: '120px',
+              maxWidth: '260px',
+              objectFit: 'contain',
+              filter: 'brightness(0) invert(1)',
+              animation: 'loader-logo-in 0.6s cubic-bezier(0.22,1,0.36,1) both',
+              marginBottom: '8px',
+            }}
+          />
+        ) : (
+          <div className="loader-union" style={{ perspective:'700px' }}>
+            {letters.map((l, i) => (
+              <span key={l} className="loader-letter" style={{ animationDelay:`${0.08 * i}s` }}>{l}</span>
+            ))}
+          </div>
+        )}
 
         {/* 서브타이틀 */}
         <div className="loader-name">홍익대학교 총동아리연합회</div>
@@ -227,13 +242,13 @@ export default function HomePage() {
 
   // 처음 방문 (캐시 없음) → 로딩 화면만 표시
   if (!ready) {
-    return <LoaderScreen exiting={false} />;
+    return <LoaderScreen exiting={false} logoUrl={heroLogoUrl || undefined} />;
   }
 
   return (
     <>
       {/* 로딩 화면 퇴장 오버레이 */}
-      {showLoader && <LoaderScreen exiting={loaderExiting} />}
+      {showLoader && <LoaderScreen exiting={loaderExiting} logoUrl={heroLogoUrl || undefined} />}
 
       <div style={{ background: '#EDE8F5', minHeight: '100vh', animation: 'sr-fade-in 0.5s ease both' }}>
 
