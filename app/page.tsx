@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, getClubMapImage, getLogo, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
+import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, getClubMapImage, getHeroLogo, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
 import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -180,7 +180,7 @@ export default function HomePage() {
     return c.clubBuildings ?? [];
   });
   const [clubMapImage, setClubMapImage] = useState(() => syncGetStr('hn_club_map_image'));
-  const [heroLogoUrl, setHeroLogoUrl] = useState(() => syncGetStr('hn_logo'));
+  const [heroLogoUrl, setHeroLogoUrl] = useState(() => syncGetStr('hn_hero_logo'));
 
   // 로더 상태
   const startTimeRef = useRef(Date.now());
@@ -203,7 +203,7 @@ export default function HomePage() {
       getCalendarEvents().then(setCalEvents),
       getMinutes().then(setMinutes),
       getClubMapImage().then(setClubMapImage),
-      getLogo().then(v => { if (v) setHeroLogoUrl(v); }),
+      getHeroLogo().then(v => { if (v) setHeroLogoUrl(v); }),
     ]).then(() => {
       setReady(true);
       if (!hasCache) {
@@ -247,8 +247,7 @@ export default function HomePage() {
             : <div className="absolute inset-0 bg-gradient-to-br from-[#2D1B6E] via-[#5B3FA8] to-[#8B6BC9]" />
           }
 
-          {/* 그라디언트 오버레이 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
+          {/* 오버레이 없음 — 원본 이미지 그대로 */}
 
           {/* 히어로 중앙 — 로고 + 텍스트 함께 */}
           <div key={`text-${currentSlide}`}

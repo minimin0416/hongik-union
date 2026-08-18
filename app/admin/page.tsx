@@ -6,7 +6,7 @@ import {
   getClubNews, saveClubNews, getPenalties, savePenalties,
   getForms, saveForms, getElection, saveElection,
   getInquiries, saveInquiries, getBanners, saveBanners,
-  getLogo, saveLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
+  getLogo, saveLogo, getHeroLogo, saveHeroLogo, getOrgImage, saveOrgImage, getLocationImage, saveLocationImage,
   compressImage,
   getClubMapImage, saveClubMapImage, getCalendarEvents, saveCalendarEvents,
   getClubs, saveClubs, getClubImages,
@@ -1205,6 +1205,7 @@ type BannerItem = { title: string; subtitle: string; img: string };
 function ImagesTab() {
   const [items, setItems] = useState<BannerItem[]>([{ title: '', subtitle: '', img: '' }]);
   const [logo, setLogo] = useState('');
+  const [heroLogo, setHeroLogo] = useState('');
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -1218,6 +1219,7 @@ function ImagesTab() {
       })));
     });
     getLogo().then(setLogo);
+    getHeroLogo().then(setHeroLogo);
   }, []);
 
   const update = (idx: number, patch: Partial<BannerItem>) =>
@@ -1260,6 +1262,29 @@ function ImagesTab() {
         ctx.drawImage(img, 0, 0, w, h);
         const url = canvas.toDataURL('image/png');
         setLogo(url); saveLogo(url);
+      };
+      img.src = ev.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleHeroLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 600;
+        const s = img.width > maxW ? maxW / img.width : 1;
+        const w = Math.round(img.width * s) || 1;
+        const h = Math.round(img.height * s) || 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const url = canvas.toDataURL('image/png');
+        setHeroLogo(url); saveHeroLogo(url);
       };
       img.src = ev.target?.result as string;
     };
@@ -1343,9 +1368,9 @@ function ImagesTab() {
       </div>
 
       {/* 로고 */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <h3 className="font-semibold text-gray-700 mb-1">로고</h3>
-        <p className="text-xs text-gray-400 mb-4">권장: PNG · 가로 200px 이상</p>
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
+        <h3 className="font-semibold text-gray-700 mb-1">헤더 로고 (학교 로고)</h3>
+        <p className="text-xs text-gray-400 mb-4">상단 헤더에 표시됩니다 · 권장: PNG · 가로 200px 이상</p>
         <div className="flex items-center gap-4">
           <div className="w-40 h-16 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
             {logo
@@ -1360,6 +1385,32 @@ function ImagesTab() {
             </label>
             {logo && (
               <button onClick={() => { setLogo(''); saveLogo(''); }}
+                className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">
+                삭제
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 배너 로고 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <h3 className="font-semibold text-gray-700 mb-1">배너 로고 (학생회 로고)</h3>
+        <p className="text-xs text-gray-400 mb-4">메인 화면 배너 중앙에 표시됩니다 · 권장: PNG 투명 배경 · 가로 400px 이상</p>
+        <div className="flex items-center gap-4">
+          <div className="w-52 h-24 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50">
+            {heroLogo
+              ? <img src={heroLogo} alt="배너 로고" style={{ maxHeight: '72px', maxWidth: '100%', objectFit: 'contain' }} />
+              : <span className="text-xs text-gray-400">배너 로고 없음</span>
+            }
+          </div>
+          <div className="flex gap-2">
+            <label className="cursor-pointer px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+              {heroLogo ? '로고 교체' : '로고 업로드'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleHeroLogo} />
+            </label>
+            {heroLogo && (
+              <button onClick={() => { setHeroLogo(''); saveHeroLogo(''); }}
                 className="px-3 py-2 border border-red-300 text-red-500 text-sm rounded-lg hover:bg-red-50">
                 삭제
               </button>

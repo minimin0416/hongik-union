@@ -284,6 +284,8 @@ export const saveLogo = (v: string) => {
   if (typeof window !== 'undefined') localStorage.removeItem('hn_logo');
   return dbSetStr('hn_logo', v);
 };
+export const getHeroLogo = (): Promise<string> => dbGetStr('hn_hero_logo');
+export const saveHeroLogo = (v: string) => dbSetStr('hn_hero_logo', v);
 export const getOrgImage      = (): Promise<string> => dbGetStr('hn_org_image');
 export const saveOrgImage     = (v: string)         => dbSetStr('hn_org_image', v);
 export const getLocationImage = (): Promise<string> => dbGetStr('hn_location_image');
