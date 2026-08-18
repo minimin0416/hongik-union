@@ -424,10 +424,10 @@ function ClubListPanel({ getList, saveList: saveFn, label, getImages }: {
                   </div>
                 ))}
                 <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 border-2 border-dashed border-gray-300 rounded-lg text-xs text-gray-500 hover:border-gray-400 hover:bg-gray-50 w-fit">
-                  🖼️ 사진 추가 (최대 3장)
+                  🖼️ 사진 추가 (최대 5장)
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return;
-                    if ((form.imageUrls ?? []).length >= 3) { alert('활동 사진은 최대 3장까지 등록할 수 있습니다.'); return; }
+                    if ((form.imageUrls ?? []).length >= 5) { alert('활동 사진은 최대 5장까지 등록할 수 있습니다.'); return; }
                     const compressed = await compressImage(file, 600, 0.60);
                     setForm({ ...form, imageUrls: [...(form.imageUrls ?? []), compressed] });
                   }} />

@@ -89,17 +89,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center h-16">
-          {/* Logo: null=SSR(빈박스), ''=기본로고없음(빈박스), 값있으면 표시 */}
-          <Link href="/" className="flex-shrink-0 mr-8">
+      <div className="w-full px-8 lg:px-14">
+        <div className="flex items-center h-20">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0 mr-10">
             {logoUrl
               ? <img
                   src={logoUrl}
                   alt="로고"
-                  style={{ height: '40px', maxWidth: '160px', objectFit: 'contain' }}
+                  style={{ height: '52px', maxWidth: '200px', objectFit: 'contain' }}
                 />
-              : <div style={{ width: '120px', height: '40px' }} />
+              : <div style={{ width: '140px', height: '52px' }} />
             }
           </Link>
 
@@ -111,7 +111,7 @@ export default function Header() {
                 <div key={item.href} className="relative group h-full flex items-center">
                   <Link
                     href={item.href}
-                    className={`px-3 xl:px-4 h-full flex items-center text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${
+                    className={`px-4 xl:px-5 h-full flex items-center text-base font-semibold transition-colors whitespace-nowrap border-b-2 ${
                       isActive
                         ? 'text-gray-900 border-gray-900'
                         : 'text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300'
@@ -120,12 +120,12 @@ export default function Header() {
                     {item.title}
                   </Link>
                   {/* Dropdown */}
-                  <div className="absolute top-full left-0 hidden group-hover:block min-w-36 bg-white shadow-lg rounded-b-lg overflow-hidden z-50 border-t-2 border-gray-900">
+                  <div className="absolute top-full left-0 hidden group-hover:block min-w-40 bg-white shadow-lg rounded-b-lg overflow-hidden z-50 border-t-2 border-gray-900">
                     {item.submenu.map((sub) => (
                       <Link
                         key={sub.href + sub.title}
                         href={sub.href}
-                        className={`block px-4 py-2.5 text-sm transition-colors ${
+                        className={`block px-5 py-3 text-base transition-colors ${
                           pathname === sub.href
                             ? 'bg-gray-100 text-gray-900 font-semibold'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'

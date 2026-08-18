@@ -273,23 +273,23 @@ export default function HomePage() {
         </div>
 
         {/* ── 달력 + 공지사항 ── */}
-        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
           <ScrollReveal animation="fade-right" delay={0}>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">달력</h2>
-            <div className="bg-white rounded p-4 shadow-sm">
+            <h2 className="text-base font-bold text-gray-700 mb-3">달력</h2>
+            <div className="bg-white rounded-lg p-5 shadow-sm">
               <SimpleCalendar events={calEvents} />
             </div>
           </ScrollReveal>
 
           <ScrollReveal animation="fade-left" delay={100}>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">공지사항</h2>
-            <div className="bg-white rounded shadow-sm overflow-hidden" style={{ minHeight: '220px' }}>
+            <h2 className="text-base font-bold text-gray-700 mb-3">공지사항</h2>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ minHeight: '220px' }}>
               {notices.map((n, idx) => (
                 <Link key={n.id} href="/news/notices"
-                  className={`flex items-center gap-2 px-4 py-3 text-sm hover:bg-blue-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                  {n.isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
+                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-blue-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  {n.isPinned && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
                   <span className="flex-1 text-gray-700 truncate">{n.title}</span>
-                  <span className="text-xs text-gray-400 flex-shrink-0">{n.createdAt}</span>
+                  <span className="text-sm text-gray-400 flex-shrink-0">{n.createdAt}</span>
                 </Link>
               ))}
             </div>
@@ -297,20 +297,20 @@ export default function HomePage() {
         </div>
 
         {/* ── 오시는 길 ── */}
-        <ScrollReveal animation="fade-up" delay={0} className="max-w-5xl mx-auto px-6 pb-10">
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">총동아리연합회실(G301-1) 오시는 길</h2>
-          <div className="bg-white rounded shadow-sm overflow-hidden" style={{ height: '200px' }}>
+        <ScrollReveal animation="fade-up" delay={0} className="w-full px-8 lg:px-14 pb-12">
+          <h2 className="text-base font-bold text-gray-700 mb-3">총동아리연합회실(G301-1) 오시는 길</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ height: '240px' }}>
             {locationImg
               ? <img src={locationImg} alt="오시는 길" className="w-full h-full object-contain" />
-              : <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+              : <div className="w-full h-full flex items-center justify-center text-gray-400 text-base">
                   <div className="text-center">
                     <p>지도 이미지를 업로드해주세요</p>
-                    <Link href="/about/location" className="text-blue-500 text-xs hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
+                    <Link href="/about/location" className="text-blue-500 text-sm hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
                   </div>
                 </div>
             }
           </div>
-          <Link href="/about/location" className="text-xs text-gray-400 hover:text-gray-600 mt-1 block text-right">오시는 길 자세히 보기 →</Link>
+          <Link href="/about/location" className="text-sm text-gray-400 hover:text-gray-600 mt-2 block text-right">오시는 길 자세히 보기 →</Link>
         </ScrollReveal>
       </div>
     </>
