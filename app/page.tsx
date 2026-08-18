@@ -292,13 +292,13 @@ export default function HomePage() {
             )}
             {currentSlideData && currentSlideData.title && (
               <h1 className="hero-title font-black leading-tight w-full text-center px-4"
-                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)', color: heroBannerTitleColor, textShadow: '0 1px 8px rgba(255,255,255,0.4)' }}>
+                style={{ fontSize: 'clamp(1.25rem, 4.5vw, 3.75rem)', color: heroBannerTitleColor }}>
                 {currentSlideData.title}
               </h1>
             )}
             {currentSlideData && currentSlideData.subtitle && (
               <p className="hero-sub text-base md:text-xl max-w-2xl"
-                style={{ color: heroBannerSubColor, textShadow: '0 1px 6px rgba(255,255,255,0.4)' }}>
+                style={{ color: heroBannerSubColor }}>
                 {currentSlideData.subtitle}
               </p>
             )}
