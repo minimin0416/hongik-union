@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
+import { getNotices, getSiteContent, getBanners, getCalendarEvents, getLocationImage, getMinutes, getClubMapImage, defaultContent, type Notice, type BannerSlide, type CalendarEvent, type Minutes, type ClubBuilding } from '@/lib/local-store';
 import { getHoliday } from '@/lib/holidays';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -179,6 +179,7 @@ export default function HomePage() {
     const c = syncGet<Partial<typeof defaultContent>>('hn_content', {});
     return c.clubBuildings ?? [];
   });
+  const [clubMapImage, setClubMapImage] = useState(() => syncGetStr('hn_club_map_image'));
 
   // 로더 상태
   const startTimeRef = useRef(Date.now());
@@ -200,6 +201,7 @@ export default function HomePage() {
       getLocationImage().then(setLocationImg),
       getCalendarEvents().then(setCalEvents),
       getMinutes().then(setMinutes),
+      getClubMapImage().then(setClubMapImage),
     ]).then(() => {
       setReady(true);
       if (!hasCache) {
@@ -303,8 +305,95 @@ export default function HomePage() {
           </ScrollReveal>
         )}
 
-        {/* ── 빠른 링크 카드 3개 ── */}
-        <div className="w-full px-8 lg:px-14 pt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* ── 달력 + 공지사항 ── */}
+        <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+          <ScrollReveal animation="fade-right" delay={0} className="flex flex-col">
+            <h2 className="text-base font-bold text-gray-700 mb-3">달력</h2>
+            <div className="bg-white rounded-lg p-5 shadow-sm flex-1">
+              <SimpleCalendar events={calEvents} />
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal animation="fade-left" delay={100} className="flex flex-col">
+            <h2 className="text-base font-bold text-gray-700 mb-3">공지사항</h2>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col">
+              {notices.length > 0 ? notices.map((n, idx) => (
+                <Link key={n.id} href="/news/notices"
+                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  {n.isPinned && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
+                  <span className="flex-1 text-gray-700 truncate">{n.title}</span>
+                  <span className="text-sm text-gray-400 flex-shrink-0">{n.createdAt}</span>
+                </Link>
+              )) : (
+                <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">등록된 공지사항이 없습니다</div>
+              )}
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* ── 동아리방 위치 + 회의록 ── */}
+        <div className="w-full px-8 lg:px-14 pb-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+          {/* 동아리방 위치 — 이미지 */}
+          <ScrollReveal animation="fade-right" delay={0} className="flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-700">동아리방 위치</h2>
+              <Link href="/clubs/location" className="text-sm text-[#7C5CBF] hover:underline">자세히 보기 →</Link>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex-1" style={{ minHeight: '200px' }}>
+              {clubMapImage
+                ? <img src={clubMapImage} alt="동아리방 위치" className="w-full h-full object-contain" />
+                : <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                    <div className="text-center">
+                      <p>지도 이미지를 업로드해주세요</p>
+                      <Link href="/clubs/location" className="text-[#7C5CBF] text-xs hover:underline mt-1 block">동아리방 위치 자세히 보기 →</Link>
+                    </div>
+                  </div>
+              }
+            </div>
+          </ScrollReveal>
+
+          {/* 회의록 */}
+          <ScrollReveal animation="fade-left" delay={100} className="flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-700">회의록</h2>
+              <Link href="/news/minutes" className="text-sm text-[#7C5CBF] hover:underline">전체 보기 →</Link>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col">
+              {minutes.length > 0 ? minutes.slice(0, 5).map((m, idx) => (
+                <Link key={m.id} href="/news/minutes"
+                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < Math.min(minutes.length, 5) - 1 ? 'border-b border-gray-100' : ''}`}>
+                  <svg className="w-4 h-4 text-[#9B7DD4] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="flex-1 text-gray-700 truncate">{m.title}</span>
+                  <span className="text-sm text-gray-400 flex-shrink-0">{m.date}</span>
+                </Link>
+              )) : (
+                <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">등록된 회의록이 없습니다</div>
+              )}
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* ── 오시는 길 ── */}
+        <ScrollReveal animation="fade-up" delay={0} className="w-full px-8 lg:px-14 pb-10">
+          <h2 className="text-base font-bold text-gray-700 mb-3">총동아리연합회실(G301-1) 오시는 길</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ height: '240px' }}>
+            {locationImg
+              ? <img src={locationImg} alt="오시는 길" className="w-full h-full object-contain" />
+              : <div className="w-full h-full flex items-center justify-center text-gray-400 text-base">
+                  <div className="text-center">
+                    <p>지도 이미지를 업로드해주세요</p>
+                    <Link href="/about/location" className="text-[#7C5CBF] text-sm hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
+                  </div>
+                </div>
+            }
+          </div>
+          <Link href="/about/location" className="text-sm text-gray-400 hover:text-gray-600 mt-2 block text-right">오시는 길 자세히 보기 →</Link>
+        </ScrollReveal>
+
+        {/* ── 빠른 링크 카드 3개 (맨 아래) ── */}
+        <div className="w-full px-8 lg:px-14 pb-14 grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
             {
               href: '/about/intro',
@@ -360,97 +449,6 @@ export default function HomePage() {
             </ScrollReveal>
           ))}
         </div>
-
-        {/* ── 달력 + 공지사항 ── */}
-        <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <ScrollReveal animation="fade-right" delay={0}>
-            <h2 className="text-base font-bold text-gray-700 mb-3">달력</h2>
-            <div className="bg-white rounded-lg p-5 shadow-sm">
-              <SimpleCalendar events={calEvents} />
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal animation="fade-left" delay={100}>
-            <h2 className="text-base font-bold text-gray-700 mb-3">공지사항</h2>
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ minHeight: '220px' }}>
-              {notices.map((n, idx) => (
-                <Link key={n.id} href="/news/notices"
-                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < notices.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                  {n.isPinned && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">고정</span>}
-                  <span className="flex-1 text-gray-700 truncate">{n.title}</span>
-                  <span className="text-sm text-gray-400 flex-shrink-0">{n.createdAt}</span>
-                </Link>
-              ))}
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* ── 동아리방 위치 + 회의록 ── */}
-        <div className="w-full px-8 lg:px-14 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* 동아리방 위치 */}
-          <ScrollReveal animation="fade-right" delay={0}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-bold text-gray-700">동아리방 위치</h2>
-              <Link href="/clubs/location" className="text-sm text-[#7C5CBF] hover:underline">자세히 보기 →</Link>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              {clubBuildings.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {clubBuildings.slice(0, 5).map((b, i) => (
-                    <div key={i} className="flex items-start gap-3 px-5 py-3.5">
-                      <span className="text-xs font-bold text-white px-2 py-0.5 rounded flex-shrink-0 mt-0.5" style={{ background: '#7C5CBF' }}>{b.building}</span>
-                      <span className="text-sm text-gray-600 leading-relaxed">{b.clubs.filter(Boolean).join(', ')}</span>
-                    </div>
-                  ))}
-                  {clubBuildings.length > 5 && (
-                    <div className="px-5 py-3 text-sm text-gray-400 text-center">+ {clubBuildings.length - 5}개 건물 더 보기</div>
-                  )}
-                </div>
-              ) : (
-                <div className="h-32 flex items-center justify-center text-gray-400 text-sm">동아리방 위치 정보가 없습니다</div>
-              )}
-            </div>
-          </ScrollReveal>
-
-          {/* 회의록 */}
-          <ScrollReveal animation="fade-left" delay={100}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-bold text-gray-700">회의록</h2>
-              <Link href="/news/minutes" className="text-sm text-[#7C5CBF] hover:underline">전체 보기 →</Link>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ minHeight: '140px' }}>
-              {minutes.length > 0 ? minutes.slice(0, 5).map((m, idx) => (
-                <Link key={m.id} href="/news/minutes"
-                  className={`flex items-center gap-3 px-5 py-3.5 text-base hover:bg-purple-50 hover:translate-x-0.5 transition-all ${idx < Math.min(minutes.length, 5) - 1 ? 'border-b border-gray-100' : ''}`}>
-                  <svg className="w-4 h-4 text-[#9B7DD4] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className="flex-1 text-gray-700 truncate">{m.title}</span>
-                  <span className="text-sm text-gray-400 flex-shrink-0">{m.date}</span>
-                </Link>
-              )) : (
-                <div className="h-32 flex items-center justify-center text-gray-400 text-sm">등록된 회의록이 없습니다</div>
-              )}
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* ── 오시는 길 ── */}
-        <ScrollReveal animation="fade-up" delay={0} className="w-full px-8 lg:px-14 pb-12">
-          <h2 className="text-base font-bold text-gray-700 mb-3">총동아리연합회실(G301-1) 오시는 길</h2>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{ height: '240px' }}>
-            {locationImg
-              ? <img src={locationImg} alt="오시는 길" className="w-full h-full object-contain" />
-              : <div className="w-full h-full flex items-center justify-center text-gray-400 text-base">
-                  <div className="text-center">
-                    <p>지도 이미지를 업로드해주세요</p>
-                    <Link href="/about/location" className="text-[#7C5CBF] text-sm hover:underline mt-1 block">오시는 길 자세히 보기 →</Link>
-                  </div>
-                </div>
-            }
-          </div>
-          <Link href="/about/location" className="text-sm text-gray-400 hover:text-gray-600 mt-2 block text-right">오시는 길 자세히 보기 →</Link>
-        </ScrollReveal>
       </div>
     </>
   );
