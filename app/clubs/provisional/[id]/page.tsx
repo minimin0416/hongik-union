@@ -74,8 +74,8 @@ export default function ProvisionalClubDetailPage() {
         가동아리 목록으로
       </Link>
 
-      {/* 기본 정보 + 소개글 (2열) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-stretch">
+      {/* 기본 정보 + 소개글 (1열) */}
+      <div className="flex flex-col gap-6 mb-6">
         {/* 기본 정보 */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
           <div className="px-7 pt-7 pb-5 border-b border-gray-100 flex items-start justify-between gap-4">
