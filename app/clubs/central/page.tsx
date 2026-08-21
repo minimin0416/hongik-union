@@ -52,39 +52,34 @@ function ClubsContent() {
         ))}
       </div>
 
-      {/* 동아리 리스트 */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* 동아리 카드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((club, idx) => (
-          <ScrollReveal key={club.id} animation="fade-up" delay={Math.min(idx, 10) * 30}>
+          <ScrollReveal key={club.id} animation="zoom-in" delay={Math.min(idx % 6, 5) * 70}>
             <Link href={`/clubs/central/${club.id}`}>
-              <div className={`flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer ${idx !== 0 ? 'border-t border-gray-100' : ''}`}>
-                {/* 로고 */}
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {club.logoUrl
-                    ? <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
-                    : <span className="text-gray-500 font-bold text-xs">{club.name.slice(0, 2)}</span>
-                  }
+              <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-gray-400 transition-all cursor-pointer h-full">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {club.logoUrl
+                      ? <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
+                      : <span className="text-gray-600 font-bold text-sm">{club.name.slice(0, 2)}</span>
+                    }
+                  </div>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
+                    {club.category}
+                  </span>
                 </div>
-                {/* 이름 + 분과 */}
-                <div className="w-44 flex-shrink-0">
-                  <div className="font-semibold text-gray-800 text-sm leading-tight">{club.name}</div>
-                  <span className="text-xs text-gray-400 mt-0.5 inline-block">{club.category}</span>
-                </div>
-                {/* 설명 */}
-                <p className="flex-1 text-sm text-gray-500 truncate hidden sm:block">{club.desc}</p>
-                {/* 동아리방 */}
-                {club.room && (
-                  <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0 hidden md:flex">
+                <h3 className="font-bold text-gray-800 mb-1">{club.name}</h3>
+                <p className="text-gray-500 text-sm mb-3 leading-relaxed">{club.desc}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
                     {club.room}
                   </div>
-                )}
-                {/* 화살표 */}
-                <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                  <span className="text-xs text-gray-400">자세히 보기 →</span>
+                </div>
               </div>
             </Link>
           </ScrollReveal>
