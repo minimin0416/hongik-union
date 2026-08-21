@@ -133,8 +133,8 @@ export default function ProvisionalClubDetailPage() {
         );
       })()}
 
-      {/* 활동 내용 + 환영 대상 (2열) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* 활동 내용 + 환영 대상 (1열) */}
+      <div className="flex flex-col gap-6 mb-6">
         {club.activities?.filter(Boolean).length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-7">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
